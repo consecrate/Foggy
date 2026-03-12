@@ -39,8 +39,45 @@
   color: var(--foggy-text-muted);
 }
 
+#foggy-problem #foggy-description > :first-child {
+  margin-top: 0;
+}
+
+#foggy-problem #foggy-description > :last-child {
+  margin-bottom: 0;
+}
+
 #foggy-problem #foggy-description p {
   margin-bottom: 10px;
+}
+
+#foggy-problem #foggy-description h1,
+#foggy-problem #foggy-description h2,
+#foggy-problem #foggy-description h3,
+#foggy-problem #foggy-description h4,
+#foggy-problem #foggy-description h5,
+#foggy-problem #foggy-description h6 {
+  color: var(--foggy-text);
+  line-height: 1.35;
+  margin: 20px 0 10px;
+}
+
+#foggy-problem #foggy-description h1 {
+  font-size: 28px;
+  font-weight: 800;
+}
+
+#foggy-problem #foggy-description h2 {
+  font-size: 22px;
+  font-weight: 700;
+}
+
+#foggy-problem #foggy-description h3,
+#foggy-problem #foggy-description h4,
+#foggy-problem #foggy-description h5,
+#foggy-problem #foggy-description h6 {
+  font-size: 16px;
+  font-weight: 700;
 }
 
 #foggy-problem #foggy-description code {
@@ -61,6 +98,31 @@
   font-family: var(--foggy-font-mono);
   font-size: 13px;
   line-height: 1.5;
+}
+
+#foggy-problem #foggy-description pre code {
+  background: transparent;
+  padding: 0;
+  border-radius: 0;
+  color: inherit;
+  font-size: inherit;
+}
+
+#foggy-problem #foggy-description ul,
+#foggy-problem #foggy-description ol {
+  margin: 10px 0 10px 20px;
+  padding: 0;
+}
+
+#foggy-problem #foggy-description li + li {
+  margin-top: 6px;
+}
+
+#foggy-problem #foggy-description blockquote {
+  margin: 12px 0;
+  padding-left: 12px;
+  border-left: 3px solid var(--foggy-divider);
+  color: var(--foggy-text);
 }
 
 #foggy-problem #foggy-description a {

@@ -16,7 +16,7 @@ An Anki addon that turns flashcards into a LeetCode-like coding environment. Eac
 | `Title` | text | `Two Sum` |
 | `Difficulty` | text | `Easy` / `Medium` / `Hard` |
 | `Language` | text | `Python` / `C++` |
-| `Description` | HTML | `Given an array of integers nums...` |
+| `Description` | Markdown | `Given an array of integers nums...` |
 | `FunctionName` | text | `twoSum` |
 | `StarterCode` | text | `def twoSum(nums, target):` |
 | `Solution` | text | Full working solution |

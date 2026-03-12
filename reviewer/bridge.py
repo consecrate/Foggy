@@ -57,6 +57,17 @@ def on_js_message(handled: tuple[bool, object], message: str, context) -> tuple[
         return_to_home()
         return (True, None)
 
+    if action == "answer":
+        try:
+            ease = int(data)
+            reviewer = getattr(mw, "reviewer", None)
+            if reviewer and reviewer.card:
+                mw.col.sched.answerCard(reviewer.card, ease)
+                reviewer.nextCard()
+        except Exception:
+            pass
+        return (True, None)
+
     return handled
 
 

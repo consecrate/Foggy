@@ -1,34 +1,31 @@
+import { setHidden } from "./ui.js";
+
 export function initHeader(cardData) {
   var headerTitle = document.getElementById("foggy-header-title");
   var headerState = document.getElementById("foggy-header-state");
   var langBadge = document.getElementById("foggy-lang-badge");
   var diffBadge = document.getElementById("foggy-difficulty-badge");
+  var title = cardData.title || "Foggy";
+  var isMcq = cardData.kind === "mcq";
   var diff = (cardData.difficulty || "").toLowerCase();
 
-  headerTitle.textContent = cardData.title || "Foggy";
-  headerState.textContent = cardData.isAnswer ? "Solution" : "Practice";
-  langBadge.textContent = cardData.language || "Python";
+  headerTitle.textContent = isMcq ? "MCQ" : title;
+  headerState.textContent = cardData.isAnswer ? "Answer" : "Practice";
+  setHidden(headerTitle, true);
+  setHidden(headerState, true);
+
+  if (cardData.language) {
+    langBadge.textContent = cardData.language;
+    setHidden(langBadge, false);
+  } else {
+    langBadge.textContent = "";
+    setHidden(langBadge, true);
+  }
 
   diffBadge.textContent = cardData.difficulty || "";
   diffBadge.classList.remove("easy", "medium", "hard");
   if (diff) {
     diffBadge.classList.add(diff);
   }
-}
-
-export function initSolutionTab(cardData, setHidden) {
-  var hasSolution = Boolean(cardData.isAnswer && cardData.solution);
-  var solutionButton = document.getElementById("foggy-solution-tab-btn");
-  var solutionDivider = document.getElementById("foggy-solution-divider");
-  var solutionContent = document.getElementById("foggy-solution-content");
-
-  setHidden(solutionButton, !hasSolution);
-  setHidden(solutionDivider, !hasSolution);
-
-  if (!hasSolution) {
-    solutionContent.textContent = "Solution unavailable";
-    return;
-  }
-
-  solutionContent.textContent = cardData.solution;
+  setHidden(diffBadge, true);
 }

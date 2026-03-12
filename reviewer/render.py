@@ -4,6 +4,7 @@ import io
 import json
 import traceback
 
+from ..models import MCQ_NOTETYPE_NAME, NOTETYPE_NAME
 from .assets import get_web_assets
 from .chrome import hide_reviewer_chrome, restore_reviewer_chrome
 
@@ -20,24 +21,14 @@ def on_card_will_show(text: str, card, kind: str) -> str:
         if kind not in FOGGY_REVIEW_KINDS:
             return text
 
-        if not _is_foggy_card(card):
+        note_kind = _get_note_kind(card)
+        if note_kind is None:
             restore_reviewer_chrome()
             return text
 
         hide_reviewer_chrome()
         assets = get_web_assets()
-        card_data = {
-            "title": _get_field(card, "Title"),
-            "difficulty": _get_field(card, "Difficulty"),
-            "language": _get_field(card, "Language"),
-            "description": _get_field(card, "Description"),
-            "functionName": _get_field(card, "FunctionName"),
-            "starterCode": _get_field(card, "StarterCode"),
-            "solution": _get_field(card, "Solution"),
-            "testCases": _get_field(card, "TestCases"),
-            "cardId": card.id,
-            "isAnswer": kind in ("reviewAnswer", "previewAnswer"),
-        }
+        card_data = _build_card_data(card, note_kind, kind in ("reviewAnswer", "previewAnswer"))
 
         return f"""
 <style>{assets.style_css}</style>
@@ -71,7 +62,40 @@ def _get_field(card, field_name: str) -> str:
     return ""
 
 
-def _is_foggy_card(card) -> bool:
+def _build_card_data(card, note_kind: str, is_answer: bool) -> dict[str, object]:
+    if note_kind == "mcq":
+        question = _get_field(card, "Question")
+        return {
+            "kind": "mcq",
+            "title": question,
+            "question": question,
+            "difficulty": _get_field(card, "Difficulty"),
+            "description": _get_field(card, "Description"),
+            "choices": _get_field(card, "Choices"),
+            "cardId": card.id,
+            "isAnswer": is_answer,
+        }
+
+    return {
+        "kind": "coding",
+        "title": _get_field(card, "Title"),
+        "difficulty": _get_field(card, "Difficulty"),
+        "language": _get_field(card, "Language"),
+        "description": _get_field(card, "Description"),
+        "functionName": _get_field(card, "FunctionName"),
+        "starterCode": _get_field(card, "StarterCode"),
+        "solution": _get_field(card, "Solution"),
+        "testCases": _get_field(card, "TestCases"),
+        "cardId": card.id,
+        "isAnswer": is_answer,
+    }
+
+
+def _get_note_kind(card) -> str | None:
     note = card.note()
     model = note.note_type()
-    return model["name"] == "Foggy"
+    if model["name"] == NOTETYPE_NAME:
+        return "coding"
+    if model["name"] == MCQ_NOTETYPE_NAME:
+        return "mcq"
+    return None

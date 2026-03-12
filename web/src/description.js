@@ -1,69 +1,112 @@
-const DESCRIPTION_ALLOWED_TAGS = new Set([
-  "p",
-  "br",
-  "pre",
-  "code",
-  "strong",
-  "em",
-  "ul",
-  "ol",
-  "li",
-  "blockquote",
-  "a",
-]);
+import { fromMarkdown } from "mdast-util-from-markdown";
 
-export function renderDescription(html) {
-  var container = document.getElementById("foggy-description");
+export function renderDescription(markdown, target) {
+  var container = target || document.getElementById("foggy-description");
   container.textContent = "";
 
-  if (!html) {
+  if (!markdown) {
     return;
   }
 
-  var parser = new DOMParser();
-  var doc = parser.parseFromString("<div>" + html + "</div>", "text/html");
-  var sourceRoot = doc.body.firstElementChild || doc.body;
-  var sanitized = document.createDocumentFragment();
-
-  sourceRoot.childNodes.forEach(function (node) {
-    appendSanitizedNode(sanitized, node);
-  });
-
-  container.appendChild(sanitized);
+  var tree = fromMarkdown(markdown);
+  container.appendChild(renderNodes(tree.children || []));
 }
 
-function appendSanitizedNode(parent, node) {
-  if (node.nodeType === Node.TEXT_NODE) {
-    parent.appendChild(document.createTextNode(node.textContent || ""));
-    return;
-  }
+function renderNodes(nodes) {
+  var fragment = document.createDocumentFragment();
 
-  if (node.nodeType !== Node.ELEMENT_NODE) {
-    return;
-  }
-
-  var tagName = node.tagName.toLowerCase();
-  if (!DESCRIPTION_ALLOWED_TAGS.has(tagName)) {
-    node.childNodes.forEach(function (child) {
-      appendSanitizedNode(parent, child);
-    });
-    return;
-  }
-
-  var sanitizedNode = document.createElement(tagName);
-  if (tagName === "a") {
-    var href = node.getAttribute("href") || "";
-    if (isSafeHref(href)) {
-      sanitizedNode.setAttribute("href", href);
-      sanitizedNode.setAttribute("rel", "noreferrer noopener");
+  nodes.forEach(function (node) {
+    var rendered = renderNode(node);
+    if (rendered) {
+      fragment.appendChild(rendered);
     }
-  }
-
-  node.childNodes.forEach(function (child) {
-    appendSanitizedNode(sanitizedNode, child);
   });
 
-  parent.appendChild(sanitizedNode);
+  return fragment;
+}
+
+function renderNode(node) {
+  if (!node || typeof node.type !== "string") {
+    return null;
+  }
+
+  switch (node.type) {
+    case "text":
+      return document.createTextNode(node.value || "");
+    case "paragraph":
+      return renderElement("p", node.children);
+    case "heading":
+      return renderHeading(node);
+    case "strong":
+      return renderElement("strong", node.children);
+    case "emphasis":
+      return renderElement("em", node.children);
+    case "inlineCode":
+      return renderCode(node.value || "");
+    case "code":
+      return renderCodeBlock(node.value || "", node.lang || "");
+    case "break":
+      return document.createElement("br");
+    case "blockquote":
+      return renderElement("blockquote", node.children);
+    case "list":
+      return renderList(node);
+    case "listItem":
+      return renderElement("li", node.children);
+    case "link":
+      return renderLink(node);
+    default:
+      if (Array.isArray(node.children)) {
+        return renderNodes(node.children);
+      }
+      return null;
+  }
+}
+
+function renderElement(tagName, children) {
+  var element = document.createElement(tagName);
+  element.appendChild(renderNodes(children || []));
+  return element;
+}
+
+function renderHeading(node) {
+  var depth = Number(node.depth) || 1;
+  var tagName = "h" + Math.min(Math.max(depth, 1), 6);
+  return renderElement(tagName, node.children);
+}
+
+function renderCode(value) {
+  var code = document.createElement("code");
+  code.textContent = value;
+  return code;
+}
+
+function renderCodeBlock(value, lang) {
+  var pre = document.createElement("pre");
+  var code = renderCode(value);
+  if (lang) {
+    code.setAttribute("data-language", lang);
+  }
+  pre.appendChild(code);
+  return pre;
+}
+
+function renderList(node) {
+  var listTag = node.ordered ? "ol" : "ul";
+  return renderElement(listTag, node.children);
+}
+
+function renderLink(node) {
+  var href = typeof node.url === "string" ? node.url : "";
+  if (!isSafeHref(href)) {
+    return renderNodes(node.children || []);
+  }
+
+  var link = document.createElement("a");
+  link.setAttribute("href", href);
+  link.setAttribute("rel", "noreferrer noopener");
+  link.appendChild(renderNodes(node.children || []));
+  return link;
 }
 
 function isSafeHref(href) {

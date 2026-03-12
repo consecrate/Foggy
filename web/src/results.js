@@ -1,3 +1,4 @@
+import { answerCard } from "./bridge.js";
 import { formatSerializedResult, hasDisplayValue } from "./format.js";
 import {
   createDetailField,
@@ -8,6 +9,13 @@ import {
   setHidden,
 } from "./ui.js";
 import { parseTestCases } from "./testcases.js";
+
+var RATINGS = [
+  { ease: 1, label: "Again", cls: "again" },
+  { ease: 2, label: "Hard", cls: "hard" },
+  { ease: 3, label: "Good", cls: "good" },
+  { ease: 4, label: "Easy", cls: "easy" },
+];
 
 export function renderResults(result, cardData) {
   var container = document.getElementById("foggy-results-content");
@@ -28,6 +36,12 @@ export function renderResults(result, cardData) {
 
   var resultCases = Array.isArray(result.results) ? result.results : [];
   if (!resultCases.length) {
+    if (result.revealedWithoutPass) {
+      shell.appendChild(buildSolutionRevealHeader(result, cardData));
+      container.appendChild(shell);
+      return;
+    }
+
     renderHint(container, "Press Run to execute your code");
     return;
   }
@@ -100,22 +114,36 @@ export function renderResults(result, cardData) {
   container.appendChild(shell);
 }
 
-export function unlockShowAnswer() {
-  var existing = document.getElementById("foggy-show-answer");
+export function setRatingButtonsVisible(visible) {
+  var existing = document.getElementById("foggy-rating-row");
+
+  if (!visible) {
+    if (existing) {
+      existing.remove();
+    }
+    return;
+  }
+
   if (existing) {
     return;
   }
 
-  var button = document.createElement("button");
-  button.id = "foggy-show-answer";
-  button.type = "button";
-  button.className = "foggy-show-answer-btn";
-  button.textContent = "Show Answer";
-  button.addEventListener("click", function () {
-    pycmd("ans");
+  var row = document.createElement("div");
+  row.id = "foggy-rating-row";
+  row.className = "foggy-rating-row";
+
+  RATINGS.forEach(function (rating) {
+    var btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "foggy-rating-btn foggy-rating-btn--" + rating.cls;
+    btn.textContent = rating.label;
+    btn.addEventListener("click", function () {
+      answerCard(rating.ease);
+    });
+    row.appendChild(btn);
   });
 
-  document.getElementById("foggy-bottom-panel").appendChild(button);
+  document.getElementById("foggy-bottom-panel").appendChild(row);
 }
 
 function buildResultHeader(result, focusIndex) {
@@ -157,6 +185,35 @@ function buildResultHeader(result, focusIndex) {
     result.total +
     " " +
     (result.total === 1 ? "testcase" : "testcases") +
+    " passed";
+
+  header.appendChild(meta);
+  header.appendChild(count);
+  return header;
+}
+
+function buildSolutionRevealHeader(result, cardData) {
+  var header = document.createElement("section");
+  var total = result.total || parseTestCases(cardData).length;
+
+  header.className = "foggy-result-header foggy-result-header--reveal";
+
+  var meta = document.createElement("div");
+  meta.className = "foggy-result-meta";
+
+  var detailEl = document.createElement("div");
+  detailEl.className = "foggy-result-detail";
+  detailEl.textContent = "Reference solution opened before any full-pass submission.";
+
+  meta.appendChild(detailEl);
+
+  var count = document.createElement("div");
+  count.className = "foggy-result-count";
+  count.textContent =
+    "0 / " +
+    total +
+    " " +
+    (total === 1 ? "testcase" : "testcases") +
     " passed";
 
   header.appendChild(meta);

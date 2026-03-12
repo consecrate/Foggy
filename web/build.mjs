@@ -11,6 +11,7 @@ const cssSources = [
   "web/styles/panels.css",
   "web/styles/testcases.css",
   "web/styles/results.css",
+  "web/styles/mcq.css",
   "web/styles/mobile.css",
 ];
 

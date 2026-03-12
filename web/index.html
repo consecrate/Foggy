@@ -18,14 +18,21 @@
   <div id="foggy-grid">
     <div id="foggy-left-wrapper">
       <div class="foggy-panel-header">
-        <div class="foggy-panel-tab active">
+        <div class="foggy-panel-tab active" data-left-tab="description">
           <span class="foggy-panel-icon" data-icon="description" aria-hidden="true"></span>
           <span class="foggy-panel-title">Description</span>
+        </div>
+        <div class="foggy-panel-tab" data-left-tab="solution">
+          <span class="foggy-panel-icon" data-icon="solution" aria-hidden="true"></span>
+          <span class="foggy-panel-title">Solution</span>
         </div>
       </div>
       <div id="foggy-problem">
         <h2 id="foggy-title"></h2>
         <div id="foggy-description"></div>
+      </div>
+      <div id="foggy-solution" class="is-hidden">
+        <div id="foggy-solution-code"></div>
       </div>
     </div>
 
@@ -55,11 +62,6 @@
             <span class="foggy-panel-icon" data-icon="test-result" aria-hidden="true"></span>
             <span class="foggy-panel-title">Test Result</span>
           </div>
-          <div class="foggy-tab-divider is-hidden" id="foggy-solution-divider"></div>
-          <div class="foggy-panel-tab is-hidden" data-tab="solution" id="foggy-solution-tab-btn">
-            <span class="foggy-panel-icon" data-icon="solution" aria-hidden="true"></span>
-            <span class="foggy-panel-title">Solution</span>
-          </div>
         </div>
         <div class="foggy-tab-content" id="foggy-tab-testcase">
           <div id="foggy-testcase-content">
@@ -71,8 +73,19 @@
             <span class="foggy-hint">Press Run to execute your code</span>
           </div>
         </div>
-        <div class="foggy-tab-content is-hidden" id="foggy-tab-solution">
-          <pre id="foggy-solution-content"><span class="foggy-hint">Solution unavailable</span></pre>
+      </div>
+    </div>
+  </div>
+
+  <div id="foggy-mcq-view" class="is-hidden">
+    <div id="foggy-mcq-shell">
+      <div id="foggy-mcq-panel">
+        <h1 id="foggy-mcq-question"></h1>
+        <div id="foggy-mcq-description" class="is-hidden"></div>
+        <div id="foggy-mcq-choices" role="listbox" aria-label="Answer choices"></div>
+        <div id="foggy-mcq-actions">
+          <button id="foggy-mcq-primary-btn" type="button" disabled>Check</button>
+          <div id="foggy-mcq-rating-row" class="foggy-mcq-rating-row is-hidden"></div>
         </div>
       </div>
     </div>

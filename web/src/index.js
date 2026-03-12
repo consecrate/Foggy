@@ -1,13 +1,14 @@
 import { registerResultHandler, navigateHome, sendRunRequest } from "./bridge.js";
 import { renderDescription } from "./description.js";
 import { initEditor } from "./editor.js";
-import { initHeader, initSolutionTab } from "./header.js";
+import { initHeader } from "./header.js";
 import { initIcons } from "./icons.js";
 import { initSplitGrid } from "./layout.js";
-import { renderResults, unlockShowAnswer } from "./results.js";
+import { initMcqCard } from "./mcq.js";
+import { renderResults, setRatingButtonsVisible } from "./results.js";
 import { initTabs, setActiveTab } from "./tabs.js";
 import { populateTestcases } from "./testcases.js";
-import { setHidden } from "./ui.js";
+import { initLeftTabs } from "./left-tabs.js";
 
 function init() {
   var dataEl = document.getElementById("foggy-data");
@@ -21,10 +22,20 @@ function init() {
     cardData: cardData,
     codeStorageKey: cardData.cardId ? "foggy:code:" + cardData.cardId : null,
     editorView: null,
+    hasPassedTests: false,
+    lastResult: null,
+    solutionRevealedBeforePass: false,
   };
 
   initIcons();
   initHeader(cardData);
+  initHomeButton();
+
+  if (cardData.kind === "mcq") {
+    initMcqCard(cardData);
+    return;
+  }
+
   document.getElementById("foggy-title").textContent = cardData.title;
   renderDescription(cardData.description);
 
@@ -37,27 +48,36 @@ function init() {
     setActiveTab(target, state);
   });
   initSplitGrid();
-  initSolutionTab(cardData, setHidden);
-  setActiveTab(cardData.isAnswer && cardData.solution ? "solution" : state.activeTab, state);
+  initLeftTabs(cardData, function () {
+    handleSolutionAccess(state);
+  });
+  setActiveTab(state.activeTab, state);
   populateTestcases(cardData);
   registerResultHandler(function (result) {
     setRunningState(false);
+    state.lastResult = result;
     renderResults(result, state.cardData);
 
     if (result.error === null && result.passed === result.total && result.total > 0) {
-      unlockShowAnswer();
+      state.hasPassedTests = true;
+      state.solutionRevealedBeforePass = false;
     }
+
+    setRatingButtonsVisible(state.hasPassedTests || state.solutionRevealedBeforePass);
   });
 }
 
-function initActionButtons(onRun) {
+function initHomeButton() {
   var homeButton = document.getElementById("foggy-home-btn");
-  var runButton = document.getElementById("foggy-run-btn");
-  var checkButton = document.getElementById("foggy-check-btn");
 
   if (homeButton) {
     homeButton.addEventListener("click", navigateHome);
   }
+}
+
+function initActionButtons(onRun) {
+  var runButton = document.getElementById("foggy-run-btn");
+  var checkButton = document.getElementById("foggy-check-btn");
 
   if (runButton) {
     runButton.addEventListener("click", onRun);
@@ -82,6 +102,33 @@ function runCode(state) {
     testCases: state.cardData.testCases,
     language: state.cardData.language || "Python",
   });
+}
+
+function handleSolutionAccess(state) {
+  if (state.hasPassedTests) {
+    return;
+  }
+
+  state.solutionRevealedBeforePass = true;
+  setActiveTab("result", state);
+  renderResults(buildSolutionRevealResult(state), state.cardData);
+  setRatingButtonsVisible(true);
+}
+
+function buildSolutionRevealResult(state) {
+  if (state.lastResult) {
+    return Object.assign({}, state.lastResult, {
+      revealedWithoutPass: true,
+    });
+  }
+
+  return {
+    results: [],
+    passed: 0,
+    total: 0,
+    error: null,
+    revealedWithoutPass: true,
+  };
 }
 
 function setRunningState(running) {

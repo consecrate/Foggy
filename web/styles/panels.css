@@ -50,7 +50,8 @@
   display: block;
 }
 
-.foggy-panel-tab[data-tab] {
+.foggy-panel-tab[data-tab],
+.foggy-panel-tab[data-left-tab] {
   cursor: pointer;
 }
 
@@ -73,35 +74,82 @@
   background: var(--foggy-bg-panel-strong);
 }
 
-#foggy-solution-content {
-  margin: 0;
+#foggy-solution {
+  padding: 16px 20px;
+  overflow-y: auto;
+  flex: 1;
+  background: var(--foggy-bg-panel-strong);
+}
+
+#foggy-solution-code {
   min-height: 100%;
-  white-space: pre-wrap;
-  word-break: break-word;
-  font-size: 13px;
-  line-height: 1.7;
-  font-family: var(--foggy-font-mono);
-  color: var(--foggy-text);
+}
+
+#foggy-solution-code .cm-editor {
   background: var(--foggy-bg-muted);
   border: 1px solid var(--foggy-border);
   border-radius: 10px;
+  overflow: hidden;
+  font-size: 13px;
+}
+
+#foggy-solution-code .cm-scroller {
+  font-family: var(--foggy-font-mono);
+}
+
+#foggy-solution-code .cm-content {
   padding: 14px 16px;
+  line-height: 1.7;
 }
 
-.foggy-show-answer-btn {
-  display: block;
-  margin: 12px auto;
-  padding: 10px 28px;
-  font-size: 15px;
+#foggy-solution-code .cm-gutters {
+  border-right: 1px solid var(--foggy-border);
+}
+
+.foggy-rating-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 12px 0;
+}
+
+.foggy-rating-btn {
+  appearance: none;
+  -webkit-appearance: none;
+  display: inline-flex;
+  align-items: center;
+  height: 32px;
+  padding: 0 20px;
+  font-family: var(--foggy-font-sans);
+  font-size: 13px;
   font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
+  background: rgba(255, 255, 255, 0.08);
   border: none;
-  border-radius: 8px;
-  background: var(--foggy-accent);
-  color: var(--foggy-bg);
+  border-radius: 6px;
   cursor: pointer;
-  transition: background 0.15s;
+  transition:
+    background 0.15s ease,
+    transform 0.1s ease;
 }
 
-.foggy-show-answer-btn:hover {
-  background: var(--foggy-accent-hover);
+.foggy-rating-btn:hover {
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.foggy-rating-btn:active {
+  transform: scale(0.97);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.foggy-rating-btn--again { color: #ef4444; }
+.foggy-rating-btn--hard  { color: #f59e0b; }
+.foggy-rating-btn--good  { color: #3b82f6; }
+.foggy-rating-btn--easy  { color: #22c55e; }
+
+.foggy-result-header--reveal {
+  border-color: rgba(212, 184, 112, 0.18);
+  background: rgba(212, 184, 112, 0.06);
 }

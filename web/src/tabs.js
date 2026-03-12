@@ -18,5 +18,4 @@ export function setActiveTab(target, state) {
 
   setHidden(document.getElementById("foggy-tab-testcase"), target !== "testcase");
   setHidden(document.getElementById("foggy-tab-result"), target !== "result");
-  setHidden(document.getElementById("foggy-tab-solution"), target !== "solution");
 }
