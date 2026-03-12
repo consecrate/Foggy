@@ -56,11 +56,11 @@ def _get_field(card, field_name: str) -> str:
     return ""
 
 
-def _is_beep_card(card) -> bool:
-    """Check if a card belongs to the Beep note type."""
+def _is_foggy_card(card) -> bool:
+    """Check if a card belongs to the Foggy note type."""
     note = card.note()
     model = note.note_type()
-    return model["name"] == "Beep"
+    return model["name"] == "Foggy"
 
 
 def _hide_toolbar() -> None:
@@ -99,12 +99,12 @@ def _resolve_webview(context):
 
 
 def _on_card_will_show(text: str, card, kind: str) -> str:
-    """Replace card HTML with Beep coding UI for Beep-type cards."""
+    """Replace card HTML with Foggy coding UI for Foggy-type cards."""
     try:
         if kind not in ("reviewQuestion", "previewQuestion"):
             return text
 
-        if not _is_beep_card(card):
+        if not _is_foggy_card(card):
             _show_toolbar()
             return text
 
@@ -128,7 +128,7 @@ def _on_card_will_show(text: str, card, kind: str) -> str:
         html = f"""
 <style>{_style_css}</style>
 {_template_html}
-<script id="beep-data" type="application/json">
+<script id="foggy-data" type="application/json">
 {json.dumps(card_data)}
 </script>
 <script>
@@ -151,8 +151,8 @@ def _on_card_will_show(text: str, card, kind: str) -> str:
 
 
 def _on_js_message(handled: tuple[bool, object], message: str, context) -> tuple[bool, object]:
-    """Handle messages from JS via pycmd('beep:...')."""
-    if not message.startswith("beep:"):
+    """Handle messages from JS via pycmd('foggy:...')."""
+    if not message.startswith("foggy:"):
         return handled
 
     _, _, payload = message.partition(":")
@@ -180,7 +180,7 @@ def _on_js_message(handled: tuple[bool, object], message: str, context) -> tuple
             # Send results back to JS
             result_json = json.dumps(result)
             if web is not None:
-                web.eval(f"window.beepReceiveResults({result_json});")
+                web.eval(f"window.foggyReceiveResults({result_json});")
         except Exception as e:
             error_result = json.dumps({
                 "results": [],
@@ -189,7 +189,7 @@ def _on_js_message(handled: tuple[bool, object], message: str, context) -> tuple
                 "error": str(e),
             })
             if web is not None:
-                web.eval(f"window.beepReceiveResults({error_result});")
+                web.eval(f"window.foggyReceiveResults({error_result});")
 
         return (True, None)
 
@@ -202,7 +202,7 @@ def _on_reviewer_will_end() -> None:
 
 
 def register_hooks() -> None:
-    """Register all Beep reviewer hooks."""
+    """Register all Foggy reviewer hooks."""
     global _hooks_registered
     if _hooks_registered:
         return

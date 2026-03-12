@@ -44,7 +44,7 @@ def run_python(
         test_cases_json=test_cases_json,
     )
 
-    fd, path = tempfile.mkstemp(suffix=".py", prefix="beep_")
+    fd, path = tempfile.mkstemp(suffix=".py", prefix="foggy_")
     try:
         with os.fdopen(fd, "w") as f:
             f.write(source)

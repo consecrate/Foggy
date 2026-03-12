@@ -1,4 +1,4 @@
-/* Beep — Main JS: Split Grid init, CodeMirror, run logic, tabs, result rendering */
+/* Foggy — Main JS: Split Grid init, CodeMirror, run logic, tabs, result rendering */
 
 (function () {
   "use strict";
@@ -24,20 +24,20 @@
 
   // --- Init ---
   function init() {
-    const dataEl = document.getElementById("beep-data");
+    const dataEl = document.getElementById("foggy-data");
     if (!dataEl) return;
     cardData = JSON.parse(dataEl.textContent);
 
     // Populate problem panel
-    document.getElementById("beep-title").textContent = cardData.title;
+    document.getElementById("foggy-title").textContent = cardData.title;
     renderDescription(cardData.description);
 
     // Language badge
-    const langBadge = document.getElementById("beep-lang-badge");
+    const langBadge = document.getElementById("foggy-lang-badge");
     langBadge.textContent = cardData.language || "Python";
 
     // Difficulty badge
-    const diffBadge = document.getElementById("beep-difficulty-badge");
+    const diffBadge = document.getElementById("foggy-difficulty-badge");
     const diff = (cardData.difficulty || "").toLowerCase();
     diffBadge.textContent = cardData.difficulty || "";
     if (diff) diffBadge.classList.add(diff);
@@ -70,20 +70,20 @@
       return;
     }
 
-    // Column gutter lives in #beep-grid
+    // Column gutter lives in #foggy-grid
     SplitGridFn({
       columnGutters: [{
         track: 1,
-        element: document.getElementById("beep-gutter-col"),
+        element: document.getElementById("foggy-gutter-col"),
       }],
       columnMinSizes: { 0: 200, 2: 300 },
     });
 
-    // Row gutter lives in #beep-right (a separate grid)
+    // Row gutter lives in #foggy-right (a separate grid)
     SplitGridFn({
       rowGutters: [{
         track: 1,
-        element: document.getElementById("beep-gutter-row"),
+        element: document.getElementById("foggy-gutter-row"),
       }],
       rowMinSizes: { 0: 36, 2: 36 },
     });
@@ -117,21 +117,21 @@
           }),
         ],
       }),
-      parent: document.getElementById("beep-editor"),
+      parent: document.getElementById("foggy-editor"),
     });
 
     editorView.focus();
   }
 
   function initRunButton() {
-    var runButton = document.getElementById("beep-run-btn");
+    var runButton = document.getElementById("foggy-run-btn");
     if (runButton) {
       runButton.addEventListener("click", runCode);
     }
   }
 
   function renderDescription(html) {
-    var container = document.getElementById("beep-description");
+    var container = document.getElementById("foggy-description");
     container.textContent = "";
 
     if (!html) {
@@ -195,7 +195,7 @@
 
   // --- Tabs ---
   function initTabs() {
-    var tabs = document.querySelectorAll(".beep-tab");
+    var tabs = document.querySelectorAll(".foggy-tab");
     tabs.forEach(function (tab) {
       tab.addEventListener("click", function () {
         setActiveTab(tab.getAttribute("data-tab") || "testcase");
@@ -206,13 +206,13 @@
   function setActiveTab(target) {
     activeTab = target;
 
-    document.querySelectorAll(".beep-tab").forEach(function (tab) {
+    document.querySelectorAll(".foggy-tab").forEach(function (tab) {
       var isActive = tab.getAttribute("data-tab") === target;
       tab.classList.toggle("active", isActive);
     });
 
-    setHidden(document.getElementById("beep-tab-testcase"), target !== "testcase");
-    setHidden(document.getElementById("beep-tab-result"), target !== "result");
+    setHidden(document.getElementById("foggy-tab-testcase"), target !== "testcase");
+    setHidden(document.getElementById("foggy-tab-result"), target !== "result");
   }
 
   function setHidden(element, hidden) {
@@ -223,14 +223,14 @@
 
   function renderHint(container, text) {
     var hint = document.createElement("span");
-    hint.className = "beep-hint";
+    hint.className = "foggy-hint";
     hint.textContent = text;
     container.replaceChildren(hint);
   }
 
   // --- Testcase display ---
   function populateTestcases() {
-    var container = document.getElementById("beep-testcase-content");
+    var container = document.getElementById("foggy-testcase-content");
     container.replaceChildren();
 
     var cases;
@@ -248,17 +248,17 @@
 
     // Case tabs (Case 1, Case 2, …)
     var caseTabs = document.createElement("div");
-    caseTabs.className = "beep-case-tabs";
+    caseTabs.className = "foggy-case-tabs";
 
     var caseContents = [];
     cases.forEach(function (tc, i) {
       // Tab button
       var btn = document.createElement("button");
-      btn.className = "beep-case-tab" + (i === 0 ? " active" : "");
+      btn.className = "foggy-case-tab" + (i === 0 ? " active" : "");
       btn.type = "button";
       btn.textContent = "Case " + (i + 1);
       btn.addEventListener("click", function () {
-        caseTabs.querySelectorAll(".beep-case-tab").forEach(function (b) {
+        caseTabs.querySelectorAll(".foggy-case-tab").forEach(function (b) {
           b.classList.remove("active");
         });
         btn.classList.add("active");
@@ -270,21 +270,21 @@
 
       // Content
       var content = document.createElement("div");
-      content.className = "beep-case-content";
+      content.className = "foggy-case-content";
       setHidden(content, i !== 0);
 
       // Input args
       var inputArr = Array.isArray(tc.input) ? tc.input : [tc.input];
       inputArr.forEach(function (arg, argIdx) {
         var field = document.createElement("div");
-        field.className = "beep-case-field";
+        field.className = "foggy-case-field";
 
         var label = document.createElement("div");
-        label.className = "beep-case-label";
+        label.className = "foggy-case-label";
         label.textContent = "arg" + argIdx;
 
         var value = document.createElement("div");
-        value.className = "beep-case-value";
+        value.className = "foggy-case-value";
         value.textContent = JSON.stringify(arg);
 
         field.appendChild(label);
@@ -294,14 +294,14 @@
 
       // Expected output
       var outField = document.createElement("div");
-      outField.className = "beep-case-field";
+      outField.className = "foggy-case-field";
 
       var outLabel = document.createElement("div");
-      outLabel.className = "beep-case-label";
+      outLabel.className = "foggy-case-label";
       outLabel.textContent = "Expected";
 
       var outValue = document.createElement("div");
-      outValue.className = "beep-case-value";
+      outValue.className = "foggy-case-value";
       outValue.textContent = JSON.stringify(tc.output);
 
       outField.appendChild(outLabel);
@@ -321,7 +321,7 @@
   function runCode() {
     if (!editorView || !cardData) return;
 
-    var btn = document.getElementById("beep-run-btn");
+    var btn = document.getElementById("foggy-run-btn");
     btn.textContent = "⏳ Running...";
     btn.classList.add("running");
 
@@ -335,12 +335,12 @@
       language: cardData.language || "Python",
     };
 
-    pycmd("beep:run:" + JSON.stringify(request));
+    pycmd("foggy:run:" + JSON.stringify(request));
   }
 
   // --- Receive results from Python ---
-  window.beepReceiveResults = function beepReceiveResults(result) {
-    var btn = document.getElementById("beep-run-btn");
+  window.foggyReceiveResults = function foggyReceiveResults(result) {
+    var btn = document.getElementById("foggy-run-btn");
     btn.textContent = "▶ Run";
     btn.classList.remove("running");
 
@@ -353,12 +353,12 @@
 
   // --- Render test results ---
   function renderResults(result) {
-    var container = document.getElementById("beep-results-content");
+    var container = document.getElementById("foggy-results-content");
     container.replaceChildren();
 
     if (result.error) {
       var errDiv = document.createElement("div");
-      errDiv.className = "beep-error-msg";
+      errDiv.className = "foggy-error-msg";
       errDiv.textContent = result.error;
       container.appendChild(errDiv);
       return;
@@ -366,20 +366,20 @@
 
     result.results.forEach(function (r, i) {
       var row = document.createElement("div");
-      row.className = "beep-test-row";
+      row.className = "foggy-test-row";
 
       if (r.status === "pass") {
-        appendResultText(row, "beep-test-pass", "✅ Test " + (i + 1) + ": PASS");
+        appendResultText(row, "foggy-test-pass", "✅ Test " + (i + 1) + ": PASS");
       } else if (r.status === "fail") {
-        appendResultText(row, "beep-test-fail", "❌ Test " + (i + 1) + ": FAIL");
+        appendResultText(row, "foggy-test-fail", "❌ Test " + (i + 1) + ": FAIL");
         appendResultText(
           row,
-          "beep-test-detail",
+          "foggy-test-detail",
           "Expected " + (r.expected || "") + ", got " + (r.got || "")
         );
       } else if (r.status === "error") {
-        appendResultText(row, "beep-test-error", "⚠️ Test " + (i + 1) + ": ERROR");
-        appendResultText(row, "beep-test-detail", r.message || "");
+        appendResultText(row, "foggy-test-error", "⚠️ Test " + (i + 1) + ": ERROR");
+        appendResultText(row, "foggy-test-detail", r.message || "");
       }
 
       container.appendChild(row);
@@ -387,7 +387,7 @@
 
     var summary = document.createElement("div");
     var allPass = result.passed === result.total;
-    summary.className = "beep-summary" + (allPass ? " all-pass" : "");
+    summary.className = "foggy-summary" + (allPass ? " all-pass" : "");
     summary.textContent =
       result.passed + "/" + result.total + " tests passed" +
       (allPass ? " ✓" : "");
@@ -395,19 +395,19 @@
   }
 
   function unlockShowAnswer() {
-    var existing = document.getElementById("beep-show-answer");
+    var existing = document.getElementById("foggy-show-answer");
     if (existing) return;
 
     var btn = document.createElement("button");
-    btn.id = "beep-show-answer";
+    btn.id = "foggy-show-answer";
     btn.type = "button";
-    btn.className = "beep-show-answer-btn";
+    btn.className = "foggy-show-answer-btn";
     btn.textContent = "Show Answer";
     btn.addEventListener("click", function () {
       pycmd("ans");
     });
 
-    document.getElementById("beep-bottom-panel").appendChild(btn);
+    document.getElementById("foggy-bottom-panel").appendChild(btn);
   }
 
   function appendResultText(parent, className, text) {

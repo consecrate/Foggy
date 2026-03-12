@@ -1,4 +1,4 @@
-"""Beep — LeetCode-style coding cards for Anki."""
+"""Foggy — LeetCode-style coding cards for Anki."""
 
 from aqt import gui_hooks, mw
 from aqt.utils import showInfo, qconnect
@@ -17,7 +17,7 @@ SAMPLE_CARD = {
 
 
 def _on_profile_loaded() -> None:
-    """Initialize Beep after Anki profile is loaded."""
+    """Initialize Foggy after Anki profile is loaded."""
     from . import models, reviewer
 
     models.ensure_note_type()
@@ -25,7 +25,7 @@ def _on_profile_loaded() -> None:
 
 
 def _initialize() -> None:
-    """Create the Beep deck and ensure the Hello World sample card exists."""
+    """Create the Foggy deck and ensure the Hello World sample card exists."""
     col = mw.col
     if col is None:
         showInfo("Please open a profile first.")
@@ -34,14 +34,14 @@ def _initialize() -> None:
     from . import models
 
     models.ensure_note_type()
-    deck_id = col.decks.id("Beep")
+    deck_id = col.decks.id("Foggy")
     notetype = col.models.by_name(models.NOTETYPE_NAME)
     if notetype is None:
-        showInfo("Error: Beep note type not found.")
+        showInfo("Error: Foggy note type not found.")
         return
 
     if _sample_note_exists(col, notetype["id"]):
-        showInfo("Beep initialized!\nDeck: Beep\nCard: Hello World already exists")
+        showInfo("Foggy initialized!\nDeck: Foggy\nCard: Hello World already exists")
         return
 
     note = col.new_note(notetype)
@@ -49,7 +49,7 @@ def _initialize() -> None:
         note[field_name] = value
 
     col.add_note(note, deck_id)
-    showInfo("Beep initialized!\nDeck: Beep\nCard: Hello World")
+    showInfo("Foggy initialized!\nDeck: Foggy\nCard: Hello World")
 
 
 def _sample_note_exists(col, notetype_id: int) -> bool:

@@ -1,4 +1,4 @@
-# Beep v0 — Product Requirements Document
+# Foggy v0 — Product Requirements Document
 
 An Anki addon that turns flashcards into a LeetCode-like coding environment. Each card presents a problem on the left and a CodeMirror 6 editor on the right. You write a solution from memory, run it against test cases, and can only grade your recall after all tests pass.
 
@@ -9,7 +9,7 @@ An Anki addon that turns flashcards into a LeetCode-like coding environment. Eac
 
 ## 1. Card Structure
 
-### Note Type: `Beep`
+### Note Type: `Foggy`
 
 | Field | Type | Example |
 |---|---|---|
@@ -197,7 +197,7 @@ macOS: `xcode-select --install` is the only setup needed for C++.
 ## 4. File Structure
 
 ```
-Beep/
+Foggy/
 ├── __init__.py           # Hook registration + compiler detection
 ├── models.py             # Note type creation
 ├── reviewer.py           # card_will_show + JS message handling

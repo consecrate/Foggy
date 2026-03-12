@@ -1,9 +1,9 @@
-"""Beep note type creation and management."""
+"""Foggy note type creation and management."""
 
 from anki.models import NotetypeDict
 from aqt import mw
 
-NOTETYPE_NAME = "Beep"
+NOTETYPE_NAME = "Foggy"
 
 FIELDS = [
     "Title",
@@ -18,22 +18,22 @@ FIELDS = [
 
 # Minimal templates — the real UI is injected via card_will_show hook.
 FRONT_TEMPLATE = """\
-<div id="beep-front">
-  <div class="beep-title">{{Title}}</div>
-  <div class="beep-desc">{{Description}}</div>
+<div id="foggy-front">
+  <div class="foggy-title">{{Title}}</div>
+  <div class="foggy-desc">{{Description}}</div>
 </div>
 """
 
 BACK_TEMPLATE = """\
-<div id="beep-back">
-  <div class="beep-title">Reference Solution</div>
-  <pre class="beep-solution">{{Solution}}</pre>
+<div id="foggy-back">
+  <div class="foggy-title">Reference Solution</div>
+  <pre class="foggy-solution">{{Solution}}</pre>
 </div>
 """
 
 
 def ensure_note_type() -> None:
-    """Create or migrate the Beep note type."""
+    """Create or migrate the Foggy note type."""
     col = mw.col
     if col is None:
         return
@@ -50,7 +50,7 @@ def ensure_note_type() -> None:
 
 
 def _create_note_type(col) -> NotetypeDict:
-    """Create a fresh Beep note type."""
+    """Create a fresh Foggy note type."""
     model: NotetypeDict = col.models.new(NOTETYPE_NAME)
     _ensure_fields(col, model)
     _ensure_template(col, model)
@@ -59,7 +59,7 @@ def _create_note_type(col) -> NotetypeDict:
 
 
 def _ensure_fields(col, model: NotetypeDict) -> bool:
-    """Ensure the Beep note type has the required fields."""
+    """Ensure the Foggy note type has the required fields."""
     changed = False
     existing_fields = {field["name"] for field in model["flds"]}
 
@@ -75,7 +75,7 @@ def _ensure_fields(col, model: NotetypeDict) -> bool:
 
 
 def _ensure_template(col, model: NotetypeDict) -> bool:
-    """Ensure the primary card template matches the current Beep templates."""
+    """Ensure the primary card template matches the current Foggy templates."""
     templates = model["tmpls"]
     if templates:
         template = templates[0]
