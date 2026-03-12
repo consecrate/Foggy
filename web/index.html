@@ -1,0 +1,68 @@
+<!-- Beep LeetCode-style coding UI template -->
+<div id="beep-container">
+  <!-- Header bar -->
+  <div id="beep-header">
+    <div id="beep-lang-badge"></div>
+    <div id="beep-difficulty-badge"></div>
+    <div id="beep-spacer"></div>
+    <button id="beep-run-btn" type="button">▶ Run</button>
+  </div>
+
+  <!-- CSS Grid split layout -->
+  <div id="beep-grid">
+    <!-- Left: problem description -->
+    <div id="beep-left-wrapper">
+      <div class="beep-panel-header">
+        <div class="beep-panel-tab active">
+          <span class="beep-panel-icon">📄</span> <span class="beep-panel-title">Description</span>
+        </div>
+      </div>
+      <div id="beep-problem">
+        <h2 id="beep-title"></h2>
+        <div id="beep-description"></div>
+      </div>
+    </div>
+
+    <!-- Column gutter (draggable) -->
+    <div class="gutter-col" id="beep-gutter-col"></div>
+
+    <!-- Right column: editor + bottom panel -->
+    <div id="beep-right">
+      <!-- Code editor -->
+      <div id="beep-top-wrapper">
+        <div class="beep-panel-header">
+          <div class="beep-panel-tab active">
+            <span class="beep-panel-icon">&lt;/&gt;</span> <span class="beep-panel-title">Code</span>
+          </div>
+        </div>
+        <div id="beep-editor"></div>
+      </div>
+
+      <!-- Row gutter (draggable) -->
+      <div class="gutter-row" id="beep-gutter-row"></div>
+
+      <!-- Bottom panel: Testcase / Test Result tabs -->
+      <div id="beep-bottom-panel">
+        <div class="beep-panel-header beep-tab-bar">
+          <button class="beep-tab active" data-tab="testcase" type="button">
+            <span class="beep-tab-icon">✅</span> <span class="beep-panel-title">Testcase</span>
+          </button>
+          <div class="beep-tab-divider"></div>
+          <button class="beep-tab" data-tab="result" type="button">
+            <span class="beep-tab-icon">&gt;_</span> <span class="beep-panel-title">Test Result</span>
+          </button>
+        </div>
+        <div class="beep-tab-content" id="beep-tab-testcase">
+          <div id="beep-testcase-content">
+            <span class="beep-hint">Loading test cases…</span>
+          </div>
+        </div>
+        <div class="beep-tab-content is-hidden" id="beep-tab-result">
+          <div id="beep-results-content">
+            <span class="beep-hint">Press ▶ Run to execute your code</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
