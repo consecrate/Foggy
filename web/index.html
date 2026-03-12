@@ -3,7 +3,7 @@
   <!-- App header -->
   <div id="foggy-header">
     <button id="foggy-home-btn" type="button" aria-label="Return to home" title="Return to Decks">
-      <span aria-hidden="true">✕</span>
+      <span class="foggy-panel-icon foggy-home-icon" data-icon="close" aria-hidden="true"></span>
     </button>
     <!-- Hidden elements kept for JS compatibility -->
     <span id="foggy-header-state" class="is-hidden"></span>
@@ -11,6 +11,11 @@
     <div id="foggy-lang-badge" class="is-hidden"></div>
     <div id="foggy-difficulty-badge" class="is-hidden"></div>
     <button id="foggy-run-btn" type="button" class="is-hidden">Run</button>
+    <div class="foggy-header-spacer"></div>
+    <button id="foggy-check-btn" type="button">
+      <span class="foggy-panel-icon foggy-check-icon" data-icon="check" aria-hidden="true"></span>
+      Check
+    </button>
   </div>
 
   <!-- CSS Grid split layout -->

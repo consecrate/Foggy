@@ -19,13 +19,20 @@
   --foggy-text-dim: #606060;
   --foggy-accent: #8c8c8c;
   --foggy-accent-hover: #a0a0a0;
+  --foggy-case-pill-bg: rgba(255, 255, 255, 0.03);
+  --foggy-case-pill-edge: rgba(255, 255, 255, 0.08);
+  --foggy-case-pill-hover: rgba(255, 255, 255, 0.05);
+  --foggy-case-pill-hover-edge: rgba(255, 255, 255, 0.12);
+  --foggy-case-pill-active: #3d3d3d;
+  --foggy-case-pill-active-edge: rgba(255, 255, 255, 0.1);
   --foggy-success: #7ec87e;
   --foggy-success-hover: #6ab86a;
   --foggy-medium: #d4b870;
   --foggy-warning: #cc9966;
   --foggy-danger: #cc6666;
   --foggy-code-bg: #2a2a2a;
-  --foggy-font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --foggy-font-sans:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --foggy-font-mono: "SF Mono", "Fira Code", "Cascadia Code", monospace;
 }
 
@@ -77,23 +84,30 @@ body {
 #foggy-home-btn {
   appearance: none;
   -webkit-appearance: none;
-  width: 36px;
-  height: 36px;
-  min-width: 36px;
-  min-height: 36px;
-  max-width: 36px;
-  max-height: 36px;
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  min-height: 40px;
+  max-width: 40px;
+  max-height: 40px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   border: none;
-  border-radius: 10px;
+  padding: 0;
+  border-radius: 8px;
   background: transparent;
-  color: var(--foggy-text-subtle);
-  font-size: 18px;
-  line-height: 1;
   cursor: pointer;
-  transition: background 0.15s, color 0.15s;
+  color: var(--foggy-text-subtle);
+  cursor: pointer;
+  transition:
+    background 0.15s,
+    color 0.15s;
+}
+
+#foggy-home-btn .foggy-home-icon {
+  width: 25px;
+  height: 25px;
 }
 
 #foggy-home-btn:hover {
@@ -103,6 +117,69 @@ body {
 
 #foggy-home-btn:active {
   transform: scale(0.95);
+}
+
+#foggy-home-btn svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+  pointer-events: none;
+}
+
+.foggy-header-spacer {
+  flex: 1;
+}
+
+#foggy-check-btn {
+  appearance: none;
+  -webkit-appearance: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 16px;
+  font-family: var(--foggy-font-sans);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
+  color: #1a1a1a;
+  background: #2cbb5d;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    transform 0.1s ease,
+    box-shadow 0.15s ease;
+}
+
+#foggy-check-btn:hover {
+  background: #36d068;
+  box-shadow: 0 0 8px rgba(44, 187, 93, 0.35);
+}
+
+#foggy-check-btn:active {
+  transform: scale(0.97);
+  background: #26a550;
+}
+
+#foggy-check-btn.running {
+  background: #228b45;
+  cursor: wait;
+  opacity: 0.85;
+}
+
+#foggy-check-btn .foggy-check-icon {
+  width: 14px;
+  height: 14px;
+}
+
+#foggy-check-btn svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+  pointer-events: none;
 }
 
 /* --- CSS Grid split layout --- */
@@ -125,7 +202,7 @@ body {
   min-height: 0;
   min-width: 0;
   background: var(--foggy-bg-panel);
-  border: 1px solid var(--foggy-border);
+  border: none;
   border-radius: 12px;
   overflow: hidden;
 }
@@ -210,7 +287,10 @@ body {
   transform: translate(-50%, -50%);
   border-radius: 999px;
   background: var(--foggy-divider-handle);
-  transition: background 0.16s ease, box-shadow 0.16s ease, opacity 0.16s ease;
+  transition:
+    background 0.16s ease,
+    box-shadow 0.16s ease,
+    opacity 0.16s ease;
   z-index: 1;
 }
 
@@ -254,7 +334,10 @@ body {
   transform: translate(-50%, -50%);
   border-radius: 999px;
   background: var(--foggy-divider-handle);
-  transition: background 0.16s ease, box-shadow 0.16s ease, opacity 0.16s ease;
+  transition:
+    background 0.16s ease,
+    box-shadow 0.16s ease,
+    opacity 0.16s ease;
   z-index: 1;
 }
 
@@ -286,7 +369,7 @@ body {
   min-height: 0;
   min-width: 0;
   background: var(--foggy-bg-panel);
-  border: 1px solid var(--foggy-border);
+  border: none;
   border-radius: 12px;
   overflow: hidden;
 }
@@ -328,7 +411,7 @@ body {
   height: 36px;
   flex-shrink: 0;
   overflow: hidden;
-  border-bottom: 1px solid var(--foggy-border);
+  border-bottom: none;
 }
 
 .foggy-panel-tab {
@@ -345,7 +428,7 @@ body {
 .foggy-panel-tab.active {
   color: var(--foggy-text);
   background: var(--foggy-bg-panel-strong);
-  box-shadow: inset 0 -2px 0 var(--foggy-text-dim);
+  box-shadow: none;
 }
 
 .foggy-panel-icon {
@@ -378,6 +461,10 @@ body {
   display: none;
 }
 
+#foggy-bottom-panel .foggy-tab-divider {
+  display: none;
+}
+
 /* Tab content */
 
 .foggy-tab-content {
@@ -393,66 +480,88 @@ body {
 
 /* --- Testcase display --- */
 
-.foggy-case-tabs {
+.foggy-case-pill-rail {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-bottom: 10px;
+  gap: 12px;
   flex-wrap: wrap;
 }
 
-.foggy-case-tab {
-  all: unset !important;
-  appearance: none !important;
-  -webkit-appearance: none !important;
+.foggy-case-pill {
   box-sizing: border-box;
-  height: 28px;
-  padding: 0 12px;
+  margin-left: 0 !important;
+  padding: 8px 10px !important;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   font-family: var(--foggy-font-sans);
-  font-size: 13px;
-  font-weight: 500;
+  font-size: 14px;
+  font-weight: 600;
   line-height: 1;
   white-space: nowrap;
   color: var(--foggy-text);
-  background: transparent;
-  border: none !important;
-  border-radius: 6px !important;
-  box-shadow: none !important;
+  background: var(--foggy-case-pill-bg);
+  border: 1px solid var(--foggy-case-pill-edge) !important;
+  border-radius: 10px !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.03),
+    0 1px 2px rgba(0, 0, 0, 0.16) !important;
   outline: none !important;
   cursor: pointer;
-  transition: color 0.15s ease, background-color 0.15s ease;
+  transition:
+    color 0.15s ease,
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
 }
 
-.foggy-case-tab:hover,
-.foggy-case-tab:active,
-.foggy-case-tab:focus,
-.foggy-case-tab:focus-visible {
-  color: var(--foggy-text);
-  background: transparent;
-  border: none;
-  box-shadow: none;
+.foggy-case-pill:hover,
+.foggy-case-pill:active,
+.foggy-case-pill:focus {
+  color: #eeeeee;
+  background: var(--foggy-case-pill-hover);
+  border-color: var(--foggy-case-pill-hover-edge);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.04),
+    0 2px 4px rgba(0, 0, 0, 0.18);
   outline: none;
-  transform: none;
 }
 
-.foggy-case-tab.active {
+.foggy-case-pill[aria-selected="true"] {
   color: #f5f5f5;
-  background: #3c3c3c;
+  background: var(--foggy-case-pill-active);
+  border-color: var(--foggy-case-pill-active-edge);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.05),
+    0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
-.foggy-case-tab.active:hover,
-.foggy-case-tab.active:active,
-.foggy-case-tab.active:focus,
-.foggy-case-tab.active:focus-visible {
+.foggy-case-pill[aria-selected="true"]:hover,
+.foggy-case-pill[aria-selected="true"]:active,
+.foggy-case-pill[aria-selected="true"]:focus {
   color: #f5f5f5;
-  background: #3c3c3c;
-  border: none;
-  box-shadow: none;
+  background: var(--foggy-case-pill-active);
+  border-color: var(--foggy-case-pill-active-edge);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.05),
+    0 2px 4px rgba(0, 0, 0, 0.2);
   outline: none;
-  transform: none;
+}
+
+.foggy-case-pill:focus-visible {
+  color: #f5f5f5;
+  background: var(--foggy-case-pill-hover);
+  border-color: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.08);
+}
+
+.foggy-case-pill[aria-selected="true"]:focus-visible {
+  color: #f5f5f5;
+  background: var(--foggy-case-pill-active);
+  border-color: rgba(255, 255, 255, 0.1);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.04),
+    0 0 0 2px rgba(255, 255, 255, 0.08);
 }
 
 .foggy-case-field {
