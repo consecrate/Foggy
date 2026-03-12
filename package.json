@@ -2,6 +2,8 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "build:web": "node web/build.mjs",
+    "build": "npm run build:web && npm run build:cm && npm run build:split",
     "build:cm": "node web/vendor/codemirror/build.mjs",
     "build:split": "node web/vendor/split-grid/build.mjs"
   },

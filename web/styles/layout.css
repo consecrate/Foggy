@@ -1,0 +1,197 @@
+#foggy-grid {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 2fr 10px 3fr;
+  min-height: 0;
+  padding: 10px;
+  background: var(--foggy-bg);
+  gap: 0;
+}
+
+#foggy-left-wrapper {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+  background: var(--foggy-bg-panel);
+  border: none;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+#foggy-problem {
+  padding: 16px 20px;
+  overflow-y: auto;
+  flex: 1;
+  background: var(--foggy-bg-panel-strong);
+}
+
+#foggy-problem h2 {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--foggy-text);
+  margin-bottom: 12px;
+}
+
+#foggy-problem #foggy-description {
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--foggy-text-muted);
+}
+
+#foggy-problem #foggy-description p {
+  margin-bottom: 10px;
+}
+
+#foggy-problem #foggy-description code {
+  background: var(--foggy-code-bg);
+  padding: 1px 5px;
+  border-radius: 3px;
+  font-family: var(--foggy-font-mono);
+  font-size: 13px;
+  color: var(--foggy-danger);
+}
+
+#foggy-problem #foggy-description pre {
+  background: var(--foggy-bg-muted);
+  padding: 10px 14px;
+  border-radius: 6px;
+  overflow-x: auto;
+  margin: 8px 0;
+  font-family: var(--foggy-font-mono);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+#foggy-problem #foggy-description a {
+  color: var(--foggy-accent);
+}
+
+.gutter-col {
+  position: relative;
+  background: transparent;
+  cursor: col-resize !important;
+}
+
+.gutter-col::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 2px;
+  transform: translateX(-50%);
+  border-radius: 999px;
+  background: var(--foggy-divider-handle-hover);
+  opacity: 0;
+  transition: opacity 0.16s ease;
+}
+
+.gutter-col::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 3px;
+  height: 28px;
+  transform: translate(-50%, -50%);
+  border-radius: 999px;
+  background: var(--foggy-divider-handle);
+  transition:
+    background 0.16s ease,
+    box-shadow 0.16s ease,
+    opacity 0.16s ease;
+  z-index: 1;
+}
+
+.gutter-col:hover::after,
+.gutter-col:active::after {
+  opacity: 1;
+}
+
+.gutter-col:hover::before,
+.gutter-col:active::before {
+  opacity: 0;
+}
+
+.gutter-row {
+  position: relative;
+  background: transparent;
+  cursor: row-resize !important;
+}
+
+.gutter-row::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 2px;
+  transform: translateY(-50%);
+  border-radius: 999px;
+  background: var(--foggy-divider-handle-hover);
+  opacity: 0;
+  transition: opacity 0.16s ease;
+}
+
+.gutter-row::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 28px;
+  height: 3px;
+  transform: translate(-50%, -50%);
+  border-radius: 999px;
+  background: var(--foggy-divider-handle);
+  transition:
+    background 0.16s ease,
+    box-shadow 0.16s ease,
+    opacity 0.16s ease;
+  z-index: 1;
+}
+
+.gutter-row:hover::after,
+.gutter-row:active::after {
+  opacity: 1;
+}
+
+.gutter-row:hover::before,
+.gutter-row:active::before {
+  opacity: 0;
+}
+
+#foggy-right {
+  display: grid;
+  grid-template-rows: 1fr 10px 0.88fr;
+  min-height: 0;
+  min-width: 0;
+  background: var(--foggy-bg);
+}
+
+#foggy-top-wrapper {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+  background: var(--foggy-bg-panel);
+  border: none;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+#foggy-editor {
+  min-width: 0;
+  min-height: 0;
+  flex: 1;
+  overflow: hidden;
+}
+
+#foggy-editor .cm-editor {
+  height: 100%;
+  font-size: 14px;
+}
+
+#foggy-editor .cm-scroller {
+  font-family: var(--foggy-font-mono);
+}

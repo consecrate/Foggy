@@ -1,0 +1,107 @@
+#foggy-bottom-panel {
+  display: flex;
+  flex-direction: column;
+  background: var(--foggy-bg-panel);
+  min-height: 0;
+  overflow: hidden;
+  border-radius: 12px;
+  border: 1px solid var(--foggy-border);
+}
+
+.foggy-panel-header {
+  display: flex;
+  align-items: center;
+  background: var(--foggy-bg-panel-header);
+  height: 36px;
+  flex-shrink: 0;
+  overflow: hidden;
+  border-bottom: none;
+}
+
+.foggy-panel-tab {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 0 14px;
+  height: 100%;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--foggy-text-dim);
+}
+
+.foggy-panel-tab.active {
+  color: var(--foggy-text);
+  background: var(--foggy-bg-panel-strong);
+  box-shadow: none;
+}
+
+.foggy-panel-icon {
+  width: 14px;
+  height: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.foggy-panel-icon svg,
+.foggy-tab-icon svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.foggy-panel-tab[data-tab] {
+  cursor: pointer;
+}
+
+.foggy-tab-divider {
+  width: 1px;
+  height: 14px;
+  background: var(--foggy-border);
+  margin: 0 4px;
+}
+
+.foggy-tab-divider.is-hidden,
+#foggy-bottom-panel .foggy-tab-divider {
+  display: none;
+}
+
+.foggy-tab-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px 18px 16px;
+  background: var(--foggy-bg-panel-strong);
+}
+
+#foggy-solution-content {
+  margin: 0;
+  min-height: 100%;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-size: 13px;
+  line-height: 1.7;
+  font-family: var(--foggy-font-mono);
+  color: var(--foggy-text);
+  background: var(--foggy-bg-muted);
+  border: 1px solid var(--foggy-border);
+  border-radius: 10px;
+  padding: 14px 16px;
+}
+
+.foggy-show-answer-btn {
+  display: block;
+  margin: 12px auto;
+  padding: 10px 28px;
+  font-size: 15px;
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  background: var(--foggy-accent);
+  color: var(--foggy-bg);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.foggy-show-answer-btn:hover {
+  background: var(--foggy-accent-hover);
+}

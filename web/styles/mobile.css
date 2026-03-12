@@ -1,0 +1,23 @@
+@media (max-width: 720px) {
+  .foggy-tab-content {
+    padding: 10px 14px 14px;
+  }
+
+  .foggy-result-header {
+    flex-direction: column;
+  }
+
+  .foggy-result-count {
+    padding-top: 0;
+  }
+
+  .foggy-case-pill {
+    min-height: 38px;
+    padding: 9px 12px !important;
+  }
+
+  .foggy-case-value {
+    font-size: 13px;
+    padding: 12px 14px;
+  }
+}

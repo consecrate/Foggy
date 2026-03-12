@@ -1,0 +1,111 @@
+#foggy-header {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
+  height: 44px;
+  min-height: 44px;
+  max-height: 44px;
+  padding: 0 10px;
+  background: var(--foggy-bg-muted);
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+#foggy-home-btn {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  min-height: 40px;
+  max-width: 40px;
+  max-height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  padding: 0;
+  border-radius: 8px;
+  background: transparent;
+  cursor: pointer;
+  color: var(--foggy-text-subtle);
+  transition:
+    background 0.15s,
+    color 0.15s;
+}
+
+#foggy-home-btn .foggy-home-icon {
+  width: 25px;
+  height: 25px;
+}
+
+#foggy-home-btn:hover {
+  background: var(--foggy-surface);
+  color: var(--foggy-text);
+}
+
+#foggy-home-btn:active {
+  transform: scale(0.95);
+}
+
+#foggy-home-btn svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+  pointer-events: none;
+}
+
+.foggy-header-spacer {
+  flex: 1;
+}
+
+#foggy-check-btn {
+  appearance: none;
+  -webkit-appearance: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 16px;
+  font-family: var(--foggy-font-sans);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
+  color: #2ac243;
+  background: rgba(255, 255, 255, 0.08);
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    transform 0.1s ease;
+}
+
+#foggy-check-btn:hover {
+  background: rgba(255, 255, 255, 0.14);
+}
+
+#foggy-check-btn:active {
+  transform: scale(0.97);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+#foggy-check-btn.running {
+  background: rgba(255, 255, 255, 0.06);
+  cursor: wait;
+  opacity: 0.85;
+}
+
+#foggy-check-btn .foggy-check-icon {
+  width: 14px;
+  height: 14px;
+}
+
+#foggy-check-btn svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+  pointer-events: none;
+}

@@ -1,5 +1,3 @@
-// Build script for CodeMirror 6 bundle
-// Run: node web/vendor/codemirror/build.mjs
 import { build } from "esbuild";
 
 build({

@@ -68,7 +68,6 @@ def _sample_note_exists(col, notetype_id: int) -> bool:
 
 gui_hooks.profile_did_open.append(_on_profile_loaded)
 
-# Add "Initialize" to the Tools menu
 _action = QAction("Initialize", mw)
 qconnect(_action.triggered, _initialize)
 mw.form.menuTools.addAction(_action)

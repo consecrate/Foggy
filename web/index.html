@@ -1,11 +1,8 @@
-<!-- Foggy LeetCode-style coding UI template -->
 <div id="foggy-container">
-  <!-- App header -->
   <div id="foggy-header">
     <button id="foggy-home-btn" type="button" aria-label="Return to home" title="Return to Decks">
       <span class="foggy-panel-icon foggy-home-icon" data-icon="close" aria-hidden="true"></span>
     </button>
-    <!-- Hidden elements kept for JS compatibility -->
     <span id="foggy-header-state" class="is-hidden"></span>
     <span id="foggy-header-title" class="is-hidden"></span>
     <div id="foggy-lang-badge" class="is-hidden"></div>
@@ -18,9 +15,7 @@
     </button>
   </div>
 
-  <!-- CSS Grid split layout -->
   <div id="foggy-grid">
-    <!-- Left: problem description -->
     <div id="foggy-left-wrapper">
       <div class="foggy-panel-header">
         <div class="foggy-panel-tab active">
@@ -34,12 +29,9 @@
       </div>
     </div>
 
-    <!-- Column gutter (draggable) -->
     <div class="gutter-col" id="foggy-gutter-col"></div>
 
-    <!-- Right column: editor + bottom panel -->
     <div id="foggy-right">
-      <!-- Code editor -->
       <div id="foggy-top-wrapper">
         <div class="foggy-panel-header">
           <div class="foggy-panel-tab active">
@@ -50,10 +42,8 @@
         <div id="foggy-editor"></div>
       </div>
 
-      <!-- Row gutter (draggable) -->
       <div class="gutter-row" id="foggy-gutter-row"></div>
 
-      <!-- Bottom panel: Testcase / Test Result tabs -->
       <div id="foggy-bottom-panel">
         <div class="foggy-panel-header">
           <div class="foggy-panel-tab active" data-tab="testcase">

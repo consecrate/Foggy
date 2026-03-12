@@ -1,5 +1,3 @@
-// Build script for Split Grid bundle
-// Run: node web/vendor/split-grid/build.mjs
 import { build } from "esbuild";
 
 build({
