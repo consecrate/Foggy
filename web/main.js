@@ -307,18 +307,289 @@
     container.replaceChildren(hint);
   }
 
+  function parseTestCases() {
+    var rawCases;
+    var inputNames = parseInputNames();
+
+    try {
+      rawCases = JSON.parse(cardData.testCases || "[]");
+    } catch (e) {
+      return [];
+    }
+
+    if (!Array.isArray(rawCases)) {
+      return [];
+    }
+
+    return rawCases.map(function (testCase) {
+      var rawInputs = Array.isArray(testCase.input)
+        ? testCase.input
+        : typeof testCase.input === "undefined"
+          ? []
+          : [testCase.input];
+
+      return {
+        inputs: rawInputs.map(function (value, index) {
+          return {
+            label: (inputNames[index] || "arg" + index) + " =",
+            value: formatJsonValue(value),
+          };
+        }),
+        expected: formatJsonValue(testCase.output),
+      };
+    });
+  }
+
+  function parseInputNames() {
+    var starterCode = (cardData && cardData.starterCode) || "";
+    var signatureMatch = starterCode.match(/def\s+\w+\s*\(([^)]*)\)/m) ||
+      starterCode.match(/\w+\s*\(([^)]*)\)/m);
+
+    if (!signatureMatch) {
+      return [];
+    }
+
+    return signatureMatch[1]
+      .split(",")
+      .map(function (part) {
+        var name = part
+          .trim()
+          .replace(/^\*{1,2}/, "")
+          .replace(/^const\s+/, "")
+          .split("=")[0]
+          .trim()
+          .split(":")[0]
+          .trim()
+          .replace(/[&*\[\]]/g, "")
+          .trim()
+          .split(/\s+/)
+          .pop();
+
+        if (!name || name === "self" || name === "cls" || name === "void") {
+          return "";
+        }
+
+        return name;
+      })
+      .filter(Boolean);
+  }
+
+  function hasDisplayValue(value) {
+    return value !== undefined && !(typeof value === "string" && value.length === 0);
+  }
+
+  function formatJsonValue(value) {
+    if (value === undefined) {
+      return "undefined";
+    }
+
+    var serialized = JSON.stringify(value);
+    return serialized === undefined ? String(value) : serialized;
+  }
+
+  function formatSerializedResult(value) {
+    if (!hasDisplayValue(value)) {
+      return "";
+    }
+
+    if (typeof value !== "string") {
+      return formatJsonValue(value);
+    }
+
+    try {
+      return formatJsonValue(JSON.parse(value));
+    } catch (e) {
+      return value;
+    }
+  }
+
+  function createDetailSection(title) {
+    var section = document.createElement("section");
+    section.className = "foggy-detail-section";
+
+    var heading = document.createElement("div");
+    heading.className = "foggy-detail-heading";
+    heading.textContent = title;
+
+    section.appendChild(heading);
+    return section;
+  }
+
+  function createDetailField(label, valueText, modifierClass) {
+    var field = document.createElement("div");
+    field.className = "foggy-case-field";
+
+    if (label) {
+      var labelEl = document.createElement("div");
+      labelEl.className = "foggy-case-label";
+      labelEl.textContent = label;
+      field.appendChild(labelEl);
+    } else {
+      field.classList.add("foggy-case-field--plain");
+    }
+
+    var value = document.createElement("div");
+    value.className = "foggy-case-value";
+    if (modifierClass) {
+      value.classList.add(modifierClass);
+    }
+    value.textContent = valueText;
+
+    field.appendChild(value);
+    return field;
+  }
+
+  function renderInputSection(parent, inputs) {
+    if (!inputs.length) {
+      return;
+    }
+
+    var section = createDetailSection("Input");
+    var stack = document.createElement("div");
+    stack.className = "foggy-detail-stack";
+
+    inputs.forEach(function (input) {
+      stack.appendChild(createDetailField(input.label, input.value));
+    });
+
+    section.appendChild(stack);
+    parent.appendChild(section);
+  }
+
+  function renderValueSection(parent, title, valueText, modifierClass) {
+    if (!hasDisplayValue(valueText)) {
+      return;
+    }
+
+    var section = createDetailSection(title);
+    section.appendChild(createDetailField("", valueText, modifierClass));
+    parent.appendChild(section);
+  }
+
+  function buildResultHeader(result, focusIndex) {
+    var header = document.createElement("section");
+    var tone = "fail";
+    var title = "Wrong Answer";
+    var detail = "Output did not match the expected result.";
+    var statusSymbol = "×";
+    var results = Array.isArray(result.results) ? result.results : [];
+    var focusResult = results[focusIndex] || null;
+
+    if (result.error) {
+      tone = "error";
+      title = "Execution Error";
+      detail = result.error;
+      statusSymbol = "!";
+    } else if (result.passed === result.total && result.total > 0) {
+      tone = "pass";
+      title = "Accepted";
+      detail = "All submitted testcases passed.";
+      statusSymbol = "✓";
+    } else if (focusResult && focusResult.status === "error") {
+      tone = "error";
+      title = "Runtime Error";
+      detail = "Case " + (focusIndex + 1) + " raised an exception.";
+      statusSymbol = "!";
+    } else if (focusResult) {
+      detail = "Case " + (focusIndex + 1) + " produced a different output.";
+    }
+
+    header.className = "foggy-result-header foggy-result-header--" + tone;
+
+    var meta = document.createElement("div");
+    meta.className = "foggy-result-meta";
+
+    var detailEl = document.createElement("div");
+    detailEl.className = "foggy-result-detail";
+    detailEl.textContent = detail;
+
+    meta.appendChild(detailEl);
+
+    var count = document.createElement("div");
+    count.className = "foggy-result-count";
+    count.textContent =
+      result.passed +
+      " / " +
+      result.total +
+      " " +
+      (result.total === 1 ? "testcase" : "testcases") +
+      " passed";
+
+    header.appendChild(meta);
+    header.appendChild(count);
+
+    return header;
+  }
+
+  function getCaseStatusClass(status) {
+    if (status === "pass") {
+      return "pass";
+    }
+    if (status === "error") {
+      return "error";
+    }
+    return "fail";
+  }
+
+  function getCaseStatusSymbol(status) {
+    if (status === "pass") {
+      return "✓";
+    }
+    if (status === "error") {
+      return "!";
+    }
+    return "×";
+  }
+
+  function createResultCaseContent(resultCase, testcase, showInput) {
+    var content = document.createElement("div");
+    content.className = "foggy-case-content foggy-case-content--result";
+
+    if (showInput && testcase) {
+      renderInputSection(content, testcase.inputs);
+    }
+
+    if (resultCase.status === "error") {
+      renderValueSection(
+        content,
+        "Error",
+        resultCase.message || "Runtime error",
+        "foggy-case-value--error"
+      );
+      return content;
+    }
+
+    var outputText = "";
+    var expectedText = "";
+
+    if (resultCase.status === "pass") {
+      outputText = testcase ? testcase.expected : "";
+      expectedText = outputText;
+    } else {
+      outputText = formatSerializedResult(resultCase.got);
+      expectedText = hasDisplayValue(resultCase.expected)
+        ? formatSerializedResult(resultCase.expected)
+        : testcase
+          ? testcase.expected
+          : "";
+    }
+
+    renderValueSection(
+      content,
+      "Output",
+      outputText,
+      resultCase.status === "fail" ? "foggy-case-value--danger" : "foggy-case-value--success"
+    );
+    renderValueSection(content, "Expected", expectedText);
+
+    return content;
+  }
+
   // --- Testcase display ---
   function populateTestcases() {
     var container = document.getElementById("foggy-testcase-content");
     container.replaceChildren();
-
-    var cases;
-    try {
-      cases = JSON.parse(cardData.testCases || "[]");
-    } catch (e) {
-      renderHint(container, "No test cases");
-      return;
-    }
+    var cases = parseTestCases();
 
     if (!cases.length) {
       renderHint(container, "No test cases");
@@ -337,7 +608,20 @@
 
     var caseContents = [];
     cases.forEach(function (tc, i) {
-      // Pill button
+      var content = document.createElement("div");
+      content.className = "foggy-case-content";
+      content.setAttribute("role", "tabpanel");
+      setHidden(content, i !== 0);
+
+      renderInputSection(content, tc.inputs);
+      renderValueSection(content, "Expected", tc.expected);
+
+      caseContents.push(content);
+
+      if (!showCaseTabs) {
+        return;
+      }
+
       var btn = document.createElement("button");
       var isSelected = i === 0;
       btn.className = "foggy-case-pill";
@@ -346,60 +630,15 @@
       btn.setAttribute("aria-selected", isSelected ? "true" : "false");
       btn.textContent = "Case " + (i + 1);
       btn.addEventListener("click", function () {
-        caseTabs.querySelectorAll(".foggy-case-pill").forEach(function (b) {
-          b.setAttribute("aria-selected", "false");
+        caseTabs.querySelectorAll(".foggy-case-pill").forEach(function (pill) {
+          pill.setAttribute("aria-selected", "false");
         });
         btn.setAttribute("aria-selected", "true");
-        caseContents.forEach(function (c, j) {
-          setHidden(c, j !== i);
+        caseContents.forEach(function (panel, panelIndex) {
+          setHidden(panel, panelIndex !== i);
         });
       });
-      if (showCaseTabs) {
-        caseTabs.appendChild(btn);
-      }
-
-      // Content
-      var content = document.createElement("div");
-      content.className = "foggy-case-content";
-      content.setAttribute("role", "tabpanel");
-      setHidden(content, i !== 0);
-
-      // Input args
-      var inputArr = Array.isArray(tc.input) ? tc.input : [tc.input];
-      inputArr.forEach(function (arg, argIdx) {
-        var field = document.createElement("div");
-        field.className = "foggy-case-field";
-
-        var label = document.createElement("div");
-        label.className = "foggy-case-label";
-        label.textContent = "arg" + argIdx;
-
-        var value = document.createElement("div");
-        value.className = "foggy-case-value";
-        value.textContent = JSON.stringify(arg);
-
-        field.appendChild(label);
-        field.appendChild(value);
-        content.appendChild(field);
-      });
-
-      // Expected output
-      var outField = document.createElement("div");
-      outField.className = "foggy-case-field";
-
-      var outLabel = document.createElement("div");
-      outLabel.className = "foggy-case-label";
-      outLabel.textContent = "Expected";
-
-      var outValue = document.createElement("div");
-      outValue.className = "foggy-case-value";
-      outValue.textContent = JSON.stringify(tc.output);
-
-      outField.appendChild(outLabel);
-      outField.appendChild(outValue);
-      content.appendChild(outField);
-
-      caseContents.push(content);
+      caseTabs.appendChild(btn);
     });
 
     if (showCaseTabs) {
@@ -464,43 +703,104 @@
   function renderResults(result) {
     var container = document.getElementById("foggy-results-content");
     container.replaceChildren();
+    var shell = document.createElement("div");
+    shell.className = "foggy-result-shell";
 
     if (result.error) {
-      var errDiv = document.createElement("div");
-      errDiv.className = "foggy-error-msg";
-      errDiv.textContent = result.error;
-      container.appendChild(errDiv);
+      shell.appendChild(buildResultHeader(result, 0));
+
+      var errorSection = createDetailSection("Details");
+      errorSection.appendChild(
+        createDetailField("", result.error, "foggy-case-value--error")
+      );
+      shell.appendChild(errorSection);
+      container.appendChild(shell);
       return;
     }
 
-    result.results.forEach(function (r, i) {
-      var row = document.createElement("div");
-      row.className = "foggy-test-row";
+    var results = Array.isArray(result.results) ? result.results : [];
+    if (!results.length) {
+      renderHint(container, "Press Run to execute your code");
+      return;
+    }
 
-      if (r.status === "pass") {
-        appendResultText(row, "foggy-test-pass", "✅ Test " + (i + 1) + ": PASS");
-      } else if (r.status === "fail") {
-        appendResultText(row, "foggy-test-fail", "❌ Test " + (i + 1) + ": FAIL");
-        appendResultText(
-          row,
-          "foggy-test-detail",
-          "Expected " + (r.expected || "") + ", got " + (r.got || "")
-        );
-      } else if (r.status === "error") {
-        appendResultText(row, "foggy-test-error", "⚠️ Test " + (i + 1) + ": ERROR");
-        appendResultText(row, "foggy-test-detail", r.message || "");
+    var testCases = parseTestCases();
+    var selectedIndex = results.findIndex(function (item) {
+      return item.status !== "pass";
+    });
+    if (selectedIndex === -1) {
+      selectedIndex = 0;
+    }
+
+    shell.appendChild(buildResultHeader(result, selectedIndex));
+
+    var showCaseTabs = results.length > 1;
+    var caseContents = [];
+    var caseTabs = null;
+
+    if (showCaseTabs) {
+      caseTabs = document.createElement("div");
+      caseTabs.className = "foggy-case-pill-rail foggy-case-pill-rail--results";
+      caseTabs.setAttribute("role", "tablist");
+      caseTabs.setAttribute("aria-label", "Test results");
+    }
+
+    results.forEach(function (resultCase, index) {
+      var testcase = testCases[index] || null;
+      var content = createResultCaseContent(
+        resultCase,
+        testcase,
+        showCaseTabs
+      );
+      content.setAttribute("role", "tabpanel");
+      setHidden(content, index !== selectedIndex);
+      caseContents.push(content);
+
+      if (!showCaseTabs) {
+        return;
       }
 
-      container.appendChild(row);
+      var pill = document.createElement("button");
+      var isSelected = index === selectedIndex;
+      var statusClass = getCaseStatusClass(resultCase.status);
+      pill.className = "foggy-case-pill foggy-case-pill--result";
+      pill.type = "button";
+      pill.setAttribute("role", "tab");
+      pill.setAttribute("aria-selected", isSelected ? "true" : "false");
+
+      var statusIcon = document.createElement("span");
+      statusIcon.className =
+        "foggy-case-pill-status foggy-case-pill-status--" + statusClass;
+      statusIcon.textContent = getCaseStatusSymbol(resultCase.status);
+      statusIcon.setAttribute("aria-hidden", "true");
+
+      var label = document.createElement("span");
+      label.textContent = "Case " + (index + 1);
+
+      pill.appendChild(statusIcon);
+      pill.appendChild(label);
+      pill.addEventListener("click", function () {
+        caseTabs.querySelectorAll(".foggy-case-pill").forEach(function (tab) {
+          tab.setAttribute("aria-selected", "false");
+        });
+        pill.setAttribute("aria-selected", "true");
+        caseContents.forEach(function (panel, panelIndex) {
+          setHidden(panel, panelIndex !== index);
+        });
+      });
+
+      caseTabs.appendChild(pill);
     });
 
-    var summary = document.createElement("div");
-    var allPass = result.passed === result.total;
-    summary.className = "foggy-summary" + (allPass ? " all-pass" : "");
-    summary.textContent =
-      result.passed + "/" + result.total + " tests passed" +
-      (allPass ? " ✓" : "");
-    container.appendChild(summary);
+    if (showCaseTabs) {
+      shell.appendChild(caseTabs);
+    }
+
+    caseContents.forEach(function (content) {
+      shell.appendChild(content);
+    });
+
+    container.appendChild(shell);
   }
 
   function getStoredCode() {
@@ -541,13 +841,6 @@
     });
 
     document.getElementById("foggy-bottom-panel").appendChild(btn);
-  }
-
-  function appendResultText(parent, className, text) {
-    var span = document.createElement("span");
-    span.className = className;
-    span.textContent = text;
-    parent.appendChild(span);
   }
 
   // Run init when DOM is ready
