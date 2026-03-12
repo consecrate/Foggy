@@ -3,6 +3,14 @@
 (function () {
   "use strict";
 
+  const ICON_SVGS = {
+    description: '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M7 8.5H12M7 12H15M7 18V20.3355C7 20.8684 7 21.1348 7.10923 21.2716C7.20422 21.3906 7.34827 21.4599 7.50054 21.4597C7.67563 21.4595 7.88367 21.2931 8.29976 20.9602L10.6852 19.0518C11.1725 18.662 11.4162 18.4671 11.6875 18.3285C11.9282 18.2055 12.1844 18.1156 12.4492 18.0613C12.7477 18 13.0597 18 13.6837 18H16.2C17.8802 18 18.7202 18 19.362 17.673C19.9265 17.3854 20.3854 16.9265 20.673 16.362C21 15.7202 21 14.8802 21 13.2V7.8C21 6.11984 21 5.27976 20.673 4.63803C20.3854 4.07354 19.9265 3.6146 19.362 3.32698C18.7202 3 17.8802 3 16.2 3H7.8C6.11984 3 5.27976 3 4.63803 3.32698C4.07354 3.6146 3.6146 4.07354 3.32698 4.63803C3 5.27976 3 6.11984 3 7.8V14C3 14.93 3 15.395 3.10222 15.7765C3.37962 16.8117 4.18827 17.6204 5.22354 17.8978C5.60504 18 6.07003 18 7 18Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    code: '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M18.5708 20C19.8328 20 20.8568 18.977 20.8568 17.714V13.143L21.9998 12L20.8568 10.857V6.286C20.8568 5.023 19.8338 4 18.5708 4M5.429 4C4.166 4 3.143 5.023 3.143 6.286V10.857L2 12L3.143 13.143V17.714C3.143 18.977 4.166 20 5.429 20" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    testcase: '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M9 10.5L11 12.5L15.5 8M7 18V20.3355C7 20.8684 7 21.1348 7.10923 21.2716C7.20422 21.3906 7.34827 21.4599 7.50054 21.4597C7.67563 21.4595 7.88367 21.2931 8.29976 20.9602L10.6852 19.0518C11.1725 18.662 11.4162 18.4671 11.6875 18.3285C11.9282 18.2055 12.1844 18.1156 12.4492 18.0613C12.7477 18 13.0597 18 13.6837 18H16.2C17.8802 18 18.7202 18 19.362 17.673C19.9265 17.3854 20.3854 16.9265 20.673 16.362C21 15.7202 21 14.8802 21 13.2V7.8C21 6.11984 21 5.27976 20.673 4.63803C20.3854 4.07354 19.9265 3.6146 19.362 3.32698C18.7202 3 17.8802 3 16.2 3H7.8C6.11984 3 5.27976 3 4.63803 3.32698C4.07354 3.6146 3.6146 4.07354 3.32698 4.63803C3 5.27976 3 6.11984 3 7.8V14C3 14.93 3 15.395 3.10222 15.7765C3.37962 16.8117 4.18827 17.6204 5.22354 17.8978C5.60504 18 6.07003 18 7 18Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    "test-result": '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M22 9H2M6 17.5L8.5 15L6 12.5M11 17.5L15 17.5M2 7.8L2 16.2C2 17.8802 2 18.7202 2.32698 19.362C2.6146 19.9265 3.07354 20.3854 3.63803 20.673C4.27976 21 5.11984 21 6.8 21H17.2C18.8802 21 19.7202 21 20.362 20.673C20.9265 20.3854 21.3854 19.9265 21.673 19.362C22 18.7202 22 17.8802 22 16.2V7.8C22 6.11984 22 5.27977 21.673 4.63803C21.3854 4.07354 20.9265 3.6146 20.362 3.32698C19.7202 3 18.8802 3 17.2 3L6.8 3C5.11984 3 4.27976 3 3.63803 3.32698C3.07354 3.6146 2.6146 4.07354 2.32698 4.63803C2 5.27976 2 6.11984 2 7.8Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    solution: '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M9 7L5 12L9 17M15 7L19 12L15 17M13 5L11 19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  };
+
   const DESCRIPTION_ALLOWED_TAGS = new Set([
     "p",
     "br",
@@ -21,31 +29,27 @@
   let editorView = null;
   let cardData = null;
   let activeTab = "testcase";
+  let codeStorageKey = null;
 
   // --- Init ---
   function init() {
     const dataEl = document.getElementById("foggy-data");
     if (!dataEl) return;
     cardData = JSON.parse(dataEl.textContent);
+    codeStorageKey = cardData.cardId ? "foggy:code:" + cardData.cardId : null;
 
-    // Populate problem panel
+    initIcons();
+
+    // Populate header and problem panel
+    initHeader();
     document.getElementById("foggy-title").textContent = cardData.title;
     renderDescription(cardData.description);
-
-    // Language badge
-    const langBadge = document.getElementById("foggy-lang-badge");
-    langBadge.textContent = cardData.language || "Python";
-
-    // Difficulty badge
-    const diffBadge = document.getElementById("foggy-difficulty-badge");
-    const diff = (cardData.difficulty || "").toLowerCase();
-    diffBadge.textContent = cardData.difficulty || "";
-    if (diff) diffBadge.classList.add(diff);
 
     // Init CodeMirror
     initEditor();
 
     // Init actions
+    initHomeButton();
     initRunButton();
 
     // Init Split Grid
@@ -53,10 +57,43 @@
 
     // Init tabs
     initTabs();
-    setActiveTab(activeTab);
+    initSolutionTab();
+    setActiveTab(cardData.isAnswer && cardData.solution ? "solution" : activeTab);
 
     // Populate testcase tab
     populateTestcases();
+  }
+
+  function initHeader() {
+    var headerTitle = document.getElementById("foggy-header-title");
+    var headerState = document.getElementById("foggy-header-state");
+    var langBadge = document.getElementById("foggy-lang-badge");
+    var diffBadge = document.getElementById("foggy-difficulty-badge");
+    var diff = (cardData.difficulty || "").toLowerCase();
+
+    headerTitle.textContent = cardData.title || "Foggy";
+    headerState.textContent = cardData.isAnswer ? "Solution" : "Practice";
+    langBadge.textContent = cardData.language || "Python";
+
+    diffBadge.textContent = cardData.difficulty || "";
+    diffBadge.classList.remove("easy", "medium", "hard");
+    if (diff) {
+      diffBadge.classList.add(diff);
+    }
+  }
+
+  function initIcons() {
+    document.querySelectorAll("[data-icon]").forEach(function (iconEl) {
+      var iconName = iconEl.getAttribute("data-icon");
+      var svg = ICON_SVGS[iconName];
+
+      if (!svg) {
+        console.warn("Unknown Foggy icon:", iconName);
+        return;
+      }
+
+      iconEl.innerHTML = svg;
+    });
   }
 
   // --- Split Grid ---
@@ -101,16 +138,21 @@
       indentWithTab,
     } = window.CodeMirror;
 
-    const starterCode = cardData.starterCode || "";
+    const starterCode = getStoredCode() || cardData.starterCode || "";
 
     editorView = new EditorView({
       state: EditorState.create({
-        doc: starterCode + "\n    ",
+        doc: starterCode,
         extensions: [
           basicSetup,
           python(),
           oneDark,
           keymap.of([indentWithTab]),
+          EditorView.updateListener.of(function (update) {
+            if (update.docChanged) {
+              storeCode(update.state.doc.toString());
+            }
+          }),
           EditorView.theme({
             "&": { height: "100%" },
             ".cm-scroller": { overflow: "auto" },
@@ -123,11 +165,37 @@
     editorView.focus();
   }
 
+  function initHomeButton() {
+    var homeButton = document.getElementById("foggy-home-btn");
+    if (homeButton) {
+      homeButton.addEventListener("click", function () {
+        pycmd("foggy:home");
+      });
+    }
+  }
+
   function initRunButton() {
     var runButton = document.getElementById("foggy-run-btn");
     if (runButton) {
       runButton.addEventListener("click", runCode);
     }
+  }
+
+  function initSolutionTab() {
+    var hasSolution = Boolean(cardData.isAnswer && cardData.solution);
+    var solutionButton = document.getElementById("foggy-solution-tab-btn");
+    var solutionDivider = document.getElementById("foggy-solution-divider");
+    var solutionContent = document.getElementById("foggy-solution-content");
+
+    setHidden(solutionButton, !hasSolution);
+    setHidden(solutionDivider, !hasSolution);
+
+    if (!hasSolution) {
+      solutionContent.textContent = "Solution unavailable";
+      return;
+    }
+
+    solutionContent.textContent = cardData.solution;
   }
 
   function renderDescription(html) {
@@ -195,7 +263,7 @@
 
   // --- Tabs ---
   function initTabs() {
-    var tabs = document.querySelectorAll(".foggy-tab");
+    var tabs = document.querySelectorAll(".foggy-panel-tab[data-tab]");
     tabs.forEach(function (tab) {
       tab.addEventListener("click", function () {
         setActiveTab(tab.getAttribute("data-tab") || "testcase");
@@ -206,13 +274,14 @@
   function setActiveTab(target) {
     activeTab = target;
 
-    document.querySelectorAll(".foggy-tab").forEach(function (tab) {
+    document.querySelectorAll(".foggy-panel-tab[data-tab]").forEach(function (tab) {
       var isActive = tab.getAttribute("data-tab") === target;
       tab.classList.toggle("active", isActive);
     });
 
     setHidden(document.getElementById("foggy-tab-testcase"), target !== "testcase");
     setHidden(document.getElementById("foggy-tab-result"), target !== "result");
+    setHidden(document.getElementById("foggy-tab-solution"), target !== "solution");
   }
 
   function setHidden(element, hidden) {
@@ -322,7 +391,7 @@
     if (!editorView || !cardData) return;
 
     var btn = document.getElementById("foggy-run-btn");
-    btn.textContent = "⏳ Running...";
+    btn.textContent = "Running...";
     btn.classList.add("running");
 
     setActiveTab("result");
@@ -341,7 +410,7 @@
   // --- Receive results from Python ---
   window.foggyReceiveResults = function foggyReceiveResults(result) {
     var btn = document.getElementById("foggy-run-btn");
-    btn.textContent = "▶ Run";
+    btn.textContent = "Run";
     btn.classList.remove("running");
 
     renderResults(result);
@@ -392,6 +461,30 @@
       result.passed + "/" + result.total + " tests passed" +
       (allPass ? " ✓" : "");
     container.appendChild(summary);
+  }
+
+  function getStoredCode() {
+    if (!codeStorageKey || !window.sessionStorage) {
+      return null;
+    }
+
+    try {
+      return window.sessionStorage.getItem(codeStorageKey);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function storeCode(code) {
+    if (!codeStorageKey || !window.sessionStorage) {
+      return;
+    }
+
+    try {
+      window.sessionStorage.setItem(codeStorageKey, code);
+    } catch (e) {
+      // Ignore storage failures in embedded webviews.
+    }
   }
 
   function unlockShowAnswer() {

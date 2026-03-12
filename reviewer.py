@@ -5,6 +5,7 @@ import json
 import os
 
 from aqt import gui_hooks, mw
+from aqt.qt import QWidget
 
 from . import executor
 
@@ -19,6 +20,15 @@ _cm_bundle_js: str | None = None
 _split_bundle_js: str | None = None
 _hooks_registered = False
 _toolbar_hidden = False
+_bottom_bar_hidden = False
+_toolbar_widget_state: list[tuple[QWidget, bool, int, int, bool | None]] = []
+_bottom_bar_widget_state: list[tuple[QWidget, bool, int, int, bool | None]] = []
+_FOGGY_REVIEW_KINDS = {
+    "reviewQuestion",
+    "reviewAnswer",
+    "previewQuestion",
+    "previewAnswer",
+}
 
 
 def _load_web_assets() -> None:
@@ -63,26 +73,116 @@ def _is_foggy_card(card) -> bool:
     return model["name"] == "Foggy"
 
 
+def _hide_widgets(widgets: list[QWidget]) -> list[tuple[QWidget, bool, int, int, bool | None]]:
+    """Collapse widgets with Qt visibility while preserving Anki's hidden state."""
+    hidden_states: list[tuple[QWidget, bool, int, int, bool | None]] = []
+    for widget in widgets:
+        hidden_state = getattr(widget, "hidden", None)
+        if not isinstance(hidden_state, bool):
+            hidden_state = None
+
+        hidden_states.append((
+            widget,
+            widget.isVisible(),
+            widget.minimumHeight(),
+            widget.maximumHeight(),
+            hidden_state,
+        ))
+        widget.setMinimumHeight(0)
+        widget.setMaximumHeight(0)
+        widget.setVisible(False)
+        widget.updateGeometry()
+
+    return hidden_states
+
+
+def _restore_widgets(
+    widget_states: list[tuple[QWidget, bool, int, int, bool | None]],
+) -> None:
+    """Restore widgets hidden by _hide_widgets()."""
+    for widget, was_visible, min_height, max_height, hidden_state in reversed(widget_states):
+        widget.setMinimumHeight(min_height)
+        widget.setMaximumHeight(max_height)
+        widget.setVisible(was_visible)
+
+        # Restore Anki's toolbar-specific hidden/show state after Qt visibility.
+        if was_visible and hidden_state is True:
+            widget.hide()
+        elif was_visible and hidden_state is False:
+            widget.show()
+
+        widget.updateGeometry()
+
+
 def _hide_toolbar() -> None:
     """Hide Anki's top toolbar (Decks, Add, Browse, Stats, Sync)."""
-    global _toolbar_hidden
+    global _toolbar_hidden, _toolbar_widget_state
     if _toolbar_hidden:
         return
     toolbar = getattr(mw, "toolbar", None)
-    if toolbar and hasattr(toolbar, "web"):
-        toolbar.web.hide()
-        _toolbar_hidden = True
+    web = getattr(toolbar, "web", None)
+    if not isinstance(web, QWidget):
+        return
+
+    central = getattr(getattr(mw, "form", None), "centralwidget", None)
+    widgets: list[QWidget] = [web]
+    parent = web.parentWidget()
+    if isinstance(parent, QWidget) and parent not in (mw, central):
+        widgets.append(parent)
+
+    _toolbar_widget_state = _hide_widgets(widgets)
+
+    layout = getattr(mw, "mainLayout", None)
+    if layout is not None:
+        layout.activate()
+    _toolbar_hidden = bool(_toolbar_widget_state)
 
 
 def _show_toolbar() -> None:
     """Restore Anki's top toolbar."""
-    global _toolbar_hidden
+    global _toolbar_hidden, _toolbar_widget_state
     if not _toolbar_hidden:
         return
-    toolbar = getattr(mw, "toolbar", None)
-    if toolbar and hasattr(toolbar, "web"):
-        toolbar.web.show()
-        _toolbar_hidden = False
+    _restore_widgets(_toolbar_widget_state)
+
+    layout = getattr(mw, "mainLayout", None)
+    if layout is not None:
+        layout.activate()
+    _toolbar_widget_state = []
+    _toolbar_hidden = False
+
+
+def _hide_bottom_bar() -> None:
+    """Hide Anki's native reviewer bottom bar."""
+    global _bottom_bar_hidden, _bottom_bar_widget_state
+    if _bottom_bar_hidden:
+        return
+
+    bottom_web = getattr(mw, "bottomWeb", None)
+    if not isinstance(bottom_web, QWidget):
+        return
+
+    _bottom_bar_widget_state = _hide_widgets([bottom_web])
+
+    layout = getattr(mw, "mainLayout", None)
+    if layout is not None:
+        layout.activate()
+    _bottom_bar_hidden = bool(_bottom_bar_widget_state)
+
+
+def _show_bottom_bar() -> None:
+    """Restore Anki's native reviewer bottom bar."""
+    global _bottom_bar_hidden, _bottom_bar_widget_state
+    if not _bottom_bar_hidden:
+        return
+
+    _restore_widgets(_bottom_bar_widget_state)
+
+    layout = getattr(mw, "mainLayout", None)
+    if layout is not None:
+        layout.activate()
+    _bottom_bar_widget_state = []
+    _bottom_bar_hidden = False
 
 
 def _resolve_webview(context):
@@ -98,17 +198,48 @@ def _resolve_webview(context):
     return getattr(reviewer, "web", None)
 
 
+def _return_to_home() -> None:
+    """Leave the reviewer and return to the deck browser when possible."""
+    move_to_state = getattr(mw, "moveToState", None)
+    if callable(move_to_state):
+        for state in ("deckBrowser", "overview"):
+            try:
+                move_to_state(state)
+                _show_toolbar()
+                _show_bottom_bar()
+                return
+            except Exception:
+                continue
+
+    for handler_name in ("moveToState", "onOverview", "onDeckBrowser"):
+        handler = getattr(mw, handler_name, None)
+        if not callable(handler):
+            continue
+        try:
+            if handler_name == "moveToState":
+                handler("deckBrowser")
+            else:
+                handler()
+            _show_toolbar()
+            _show_bottom_bar()
+            return
+        except Exception:
+            continue
+
+
 def _on_card_will_show(text: str, card, kind: str) -> str:
     """Replace card HTML with Foggy coding UI for Foggy-type cards."""
     try:
-        if kind not in ("reviewQuestion", "previewQuestion"):
+        if kind not in _FOGGY_REVIEW_KINDS:
             return text
 
         if not _is_foggy_card(card):
             _show_toolbar()
+            _show_bottom_bar()
             return text
 
         _hide_toolbar()
+        _hide_bottom_bar()
 
         if _template_html is None:
             _load_web_assets()
@@ -121,7 +252,10 @@ def _on_card_will_show(text: str, card, kind: str) -> str:
             "description": _get_field(card, "Description"),
             "functionName": _get_field(card, "FunctionName"),
             "starterCode": _get_field(card, "StarterCode"),
+            "solution": _get_field(card, "Solution"),
             "testCases": _get_field(card, "TestCases"),
+            "cardId": card.id,
+            "isAnswer": kind in ("reviewAnswer", "previewAnswer"),
         }
 
         # Build the full HTML page
@@ -193,12 +327,17 @@ def _on_js_message(handled: tuple[bool, object], message: str, context) -> tuple
 
         return (True, None)
 
+    if action == "home":
+        _return_to_home()
+        return (True, None)
+
     return handled
 
 
 def _on_reviewer_will_end() -> None:
-    """Restore the toolbar when leaving the reviewer."""
+    """Restore Foggy-hidden native reviewer chrome when leaving the reviewer."""
     _show_toolbar()
+    _show_bottom_bar()
 
 
 def register_hooks() -> None:

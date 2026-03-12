@@ -1,11 +1,16 @@
 <!-- Foggy LeetCode-style coding UI template -->
 <div id="foggy-container">
-  <!-- Header bar -->
+  <!-- App header -->
   <div id="foggy-header">
-    <div id="foggy-lang-badge"></div>
-    <div id="foggy-difficulty-badge"></div>
-    <div id="foggy-spacer"></div>
-    <button id="foggy-run-btn" type="button">▶ Run</button>
+    <button id="foggy-home-btn" type="button" aria-label="Return to home" title="Return to Decks">
+      <span aria-hidden="true">✕</span>
+    </button>
+    <!-- Hidden elements kept for JS compatibility -->
+    <span id="foggy-header-state" class="is-hidden"></span>
+    <span id="foggy-header-title" class="is-hidden"></span>
+    <div id="foggy-lang-badge" class="is-hidden"></div>
+    <div id="foggy-difficulty-badge" class="is-hidden"></div>
+    <button id="foggy-run-btn" type="button" class="is-hidden">Run</button>
   </div>
 
   <!-- CSS Grid split layout -->
@@ -14,7 +19,8 @@
     <div id="foggy-left-wrapper">
       <div class="foggy-panel-header">
         <div class="foggy-panel-tab active">
-          <span class="foggy-panel-icon">📄</span> <span class="foggy-panel-title">Description</span>
+          <span class="foggy-panel-icon" data-icon="description" aria-hidden="true"></span>
+          <span class="foggy-panel-title">Description</span>
         </div>
       </div>
       <div id="foggy-problem">
@@ -32,7 +38,8 @@
       <div id="foggy-top-wrapper">
         <div class="foggy-panel-header">
           <div class="foggy-panel-tab active">
-            <span class="foggy-panel-icon">&lt;/&gt;</span> <span class="foggy-panel-title">Code</span>
+            <span class="foggy-panel-icon" data-icon="code" aria-hidden="true"></span>
+            <span class="foggy-panel-title">Code</span>
           </div>
         </div>
         <div id="foggy-editor"></div>
@@ -43,14 +50,21 @@
 
       <!-- Bottom panel: Testcase / Test Result tabs -->
       <div id="foggy-bottom-panel">
-        <div class="foggy-panel-header foggy-tab-bar">
-          <button class="foggy-tab active" data-tab="testcase" type="button">
-            <span class="foggy-tab-icon">✅</span> <span class="foggy-panel-title">Testcase</span>
-          </button>
+        <div class="foggy-panel-header">
+          <div class="foggy-panel-tab active" data-tab="testcase">
+            <span class="foggy-panel-icon" data-icon="testcase" aria-hidden="true"></span>
+            <span class="foggy-panel-title">Testcase</span>
+          </div>
           <div class="foggy-tab-divider"></div>
-          <button class="foggy-tab" data-tab="result" type="button">
-            <span class="foggy-tab-icon">&gt;_</span> <span class="foggy-panel-title">Test Result</span>
-          </button>
+          <div class="foggy-panel-tab" data-tab="result">
+            <span class="foggy-panel-icon" data-icon="test-result" aria-hidden="true"></span>
+            <span class="foggy-panel-title">Test Result</span>
+          </div>
+          <div class="foggy-tab-divider is-hidden" id="foggy-solution-divider"></div>
+          <div class="foggy-panel-tab is-hidden" data-tab="solution" id="foggy-solution-tab-btn">
+            <span class="foggy-panel-icon" data-icon="solution" aria-hidden="true"></span>
+            <span class="foggy-panel-title">Solution</span>
+          </div>
         </div>
         <div class="foggy-tab-content" id="foggy-tab-testcase">
           <div id="foggy-testcase-content">
@@ -59,8 +73,11 @@
         </div>
         <div class="foggy-tab-content is-hidden" id="foggy-tab-result">
           <div id="foggy-results-content">
-            <span class="foggy-hint">Press ▶ Run to execute your code</span>
+            <span class="foggy-hint">Press Run to execute your code</span>
           </div>
+        </div>
+        <div class="foggy-tab-content is-hidden" id="foggy-tab-solution">
+          <pre id="foggy-solution-content"><span class="foggy-hint">Solution unavailable</span></pre>
         </div>
       </div>
     </div>
