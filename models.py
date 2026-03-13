@@ -50,19 +50,16 @@ MCQ_SPEC = NoteTypeSpec(
     fields=(
         "Question",
         "Difficulty",
-        "Description",
         "Choices",
     ),
     front_template="""\
 <div id="foggy-mcq-front">
   <div class="foggy-title">{{Question}}</div>
-  <div class="foggy-desc">{{Description}}</div>
 </div>
 """,
     back_template="""\
 <div id="foggy-mcq-back">
   <div class="foggy-title">{{Question}}</div>
-  <div class="foggy-desc">{{Description}}</div>
 </div>
 """,
 )

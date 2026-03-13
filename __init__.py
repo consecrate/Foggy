@@ -23,7 +23,6 @@ CODE_SAMPLE_CARD = {
 MCQ_SAMPLE_CARD = {
     "Question": "A duck is pair-programming with you. Why did your code suddenly start working?",
     "Difficulty": "Easy",
-    "Description": "Choose the most suspiciously correct explanation.",
     "Choices": json.dumps([
         {"text": "The duck stared the bug into submission."},
         {"text": "You finally explained the problem out loud.", "correct": True},
@@ -112,10 +111,7 @@ def _is_code_sample(note) -> bool:
 
 
 def _is_mcq_sample(note) -> bool:
-    return (
-        note["Question"] == MCQ_SAMPLE_CARD["Question"]
-        and note["Description"] == MCQ_SAMPLE_CARD["Description"]
-    )
+    return note["Question"] == MCQ_SAMPLE_CARD["Question"]
 
 
 gui_hooks.profile_did_open.append(_on_profile_loaded)

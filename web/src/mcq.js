@@ -1,6 +1,6 @@
 import { answerCard } from "./bridge.js";
 import { getRoot } from "./root.js";
-import { renderDescription } from "./description.js";
+
 import { setHidden } from "./ui.js";
 
 var FIRST_TRY_RATINGS = [
@@ -32,8 +32,6 @@ function prepareLayout(cardData) {
   var headerRun = getRoot().getElementById("foggy-run-btn");
   var headerCheck = getRoot().getElementById("foggy-check-btn");
   var question = getRoot().getElementById("foggy-mcq-question");
-  var description = getRoot().getElementById("foggy-mcq-description");
-
   container.classList.add("foggy-container--mcq");
   setHidden(grid, true);
   setHidden(mcqView, false);
@@ -41,13 +39,6 @@ function prepareLayout(cardData) {
   setHidden(headerCheck, true);
 
   question.textContent = cardData.question || cardData.title || "Untitled question";
-
-  if (cardData.description) {
-    renderDescription(cardData.description, description);
-  } else {
-    description.replaceChildren();
-  }
-  setHidden(description, !cardData.description);
 }
 
 function bindPrimaryAction(state) {
@@ -137,10 +128,10 @@ function renderChoices(state) {
 
     var indexBadge = document.createElement("span");
     indexBadge.className = "foggy-mcq-choice-index";
-    indexBadge.textContent = String(index + 1);
+    indexBadge.textContent = String.fromCharCode(65 + index);
 
-    button.appendChild(text);
     button.appendChild(indexBadge);
+    button.appendChild(text);
     button.addEventListener("click", function () {
       state.selectedId = choice.id;
       renderMcq(state);

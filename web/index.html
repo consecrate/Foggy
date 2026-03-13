@@ -5,14 +5,9 @@
     </button>
     <span id="foggy-header-state" class="is-hidden"></span>
     <span id="foggy-header-title" class="is-hidden"></span>
-    <div id="foggy-lang-badge" class="is-hidden"></div>
     <div id="foggy-difficulty-badge" class="is-hidden"></div>
     <button id="foggy-run-btn" type="button" class="is-hidden">Run</button>
     <div class="foggy-header-spacer"></div>
-    <button id="foggy-check-btn" type="button">
-      <span class="foggy-panel-icon foggy-check-icon" data-icon="check" aria-hidden="true"></span>
-      Check
-    </button>
   </div>
 
   <div id="foggy-grid">
@@ -81,7 +76,6 @@
     <div id="foggy-mcq-shell">
       <div id="foggy-mcq-panel">
         <h1 id="foggy-mcq-question"></h1>
-        <div id="foggy-mcq-description" class="is-hidden"></div>
         <div id="foggy-mcq-choices" role="listbox" aria-label="Answer choices"></div>
         <div id="foggy-mcq-actions">
           <button id="foggy-mcq-primary-btn" type="button" disabled>Check</button>
@@ -89,5 +83,11 @@
         </div>
       </div>
     </div>
+  </div>
+
+  <div id="foggy-bottom-bar">
+    <button id="foggy-check-btn" type="button">
+      Run <span class="foggy-btn-shortcut">⌘+↵</span>
+    </button>
   </div>
 </div>

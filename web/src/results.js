@@ -133,7 +133,8 @@ export function setRatingButtonsVisible(visible) {
   row.id = "foggy-rating-row";
   row.className = "foggy-rating-row";
 
-  RATINGS.forEach(function (rating) {
+  var reversed = RATINGS.slice().reverse();
+  reversed.forEach(function (rating) {
     var btn = document.createElement("button");
     btn.type = "button";
     btn.className = "foggy-rating-btn foggy-rating-btn--" + rating.cls;
@@ -144,7 +145,9 @@ export function setRatingButtonsVisible(visible) {
     row.appendChild(btn);
   });
 
-  getRoot().getElementById("foggy-bottom-panel").appendChild(row);
+  var bar = getRoot().getElementById("foggy-bottom-bar");
+  var runBtn = getRoot().getElementById("foggy-check-btn");
+  bar.insertBefore(row, runBtn);
 }
 
 function buildResultHeader(result, focusIndex) {

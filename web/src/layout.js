@@ -12,6 +12,7 @@ export function initSplitGrid() {
   }
 
   splitGrid({
+    gridTemplateColumns: "2fr 10px 3fr",
     columnGutters: [
       {
         track: 1,
@@ -22,6 +23,7 @@ export function initSplitGrid() {
   });
 
   splitGrid({
+    gridTemplateRows: "1fr 10px 0.88fr",
     rowGutters: [
       {
         track: 1,

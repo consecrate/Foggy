@@ -4,7 +4,7 @@
   background: var(--foggy-bg-panel);
   min-height: 0;
   overflow: hidden;
-  border-radius: 12px;
+  border-radius: 8px;
   border: 1px solid var(--foggy-border);
 }
 
@@ -27,11 +27,13 @@
   font-size: 12px;
   font-weight: 600;
   color: var(--foggy-text-dim);
+  border-bottom: 2px solid transparent;
 }
 
 .foggy-panel-tab.active {
   color: var(--foggy-text);
-  background: var(--foggy-bg-panel-strong);
+  background: transparent;
+  border-bottom-color: oklch(0.85 0.15 145);
   box-shadow: none;
 }
 
@@ -88,7 +90,7 @@
 #foggy-solution-code .cm-editor {
   background: var(--foggy-bg-muted);
   border: 1px solid var(--foggy-border);
-  border-radius: 10px;
+  border-radius: 8px;
   overflow: hidden;
   font-size: 13px;
 }
@@ -107,49 +109,51 @@
 }
 
 .foggy-rating-row {
+  position: absolute;
+  bottom: 100%;
+  right: 18px;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  padding: 12px 0;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  padding: 0 0 4px;
+  margin-bottom: -10px;
 }
 
 .foggy-rating-btn {
   appearance: none;
   -webkit-appearance: none;
-  display: inline-flex;
+  display: flex;
   align-items: center;
-  height: 32px;
-  padding: 0 20px;
+  justify-content: center;
+  height: 30px;
+  padding: 0 14px;
   font-family: var(--foggy-font-sans);
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 600;
   line-height: 1;
   white-space: nowrap;
-  background: rgba(255, 255, 255, 0.08);
+  background: oklch(0.98 0 0 / 0.06);
   border: none;
   border-radius: 6px;
   cursor: pointer;
-  transition:
-    background 0.15s ease,
-    transform 0.1s ease;
+  transition: background 0.15s ease;
 }
 
 .foggy-rating-btn:hover {
-  background: rgba(255, 255, 255, 0.14);
+  background: oklch(0.98 0 0 / 0.1);
 }
 
 .foggy-rating-btn:active {
-  transform: scale(0.97);
-  background: rgba(255, 255, 255, 0.1);
+  background: oklch(0.98 0 0 / 0.08);
 }
 
-.foggy-rating-btn--again { color: #ef4444; }
-.foggy-rating-btn--hard  { color: #f59e0b; }
-.foggy-rating-btn--good  { color: #3b82f6; }
-.foggy-rating-btn--easy  { color: #22c55e; }
+.foggy-rating-btn--again { color: oklch(0.75 0.16 25); }
+.foggy-rating-btn--hard  { color: oklch(0.85 0.16 85); }
+.foggy-rating-btn--good  { color: oklch(0.74 0.14 250); }
+.foggy-rating-btn--easy  { color: oklch(0.85 0.15 145); }
 
 .foggy-result-header--reveal {
-  border-color: rgba(212, 184, 112, 0.18);
-  background: rgba(212, 184, 112, 0.06);
+  border-color: oklch(0.85 0.15 145 / 0.18);
+  background: oklch(0.85 0.15 145 / 0.06);
 }

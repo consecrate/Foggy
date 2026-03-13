@@ -7,10 +7,6 @@
     flex-direction: column;
   }
 
-  .foggy-result-count {
-    padding-top: 0;
-  }
-
   .foggy-case-pill {
     min-height: 38px;
     padding: 9px 12px;

@@ -1,66 +1,42 @@
 #foggy-mcq-view {
   flex: 1;
   min-height: 0;
-  padding: 28px 20px 32px;
+  padding: 32px 24px 24px;
   display: flex;
   align-items: flex-start;
   justify-content: center;
   overflow-y: auto;
-  background:
-    radial-gradient(circle at top, rgba(212, 184, 112, 0.08), transparent 34%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0));
+  background: var(--foggy-bg);
 }
 
 #foggy-mcq-shell {
-  width: min(100%, 760px);
+  width: min(100%, 720px);
 }
 
 #foggy-mcq-panel {
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  gap: 16px;
   width: 100%;
-  padding: 32px;
-  border: 1px solid var(--foggy-border);
-  border-radius: 24px;
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.025), rgba(255, 255, 255, 0.01)),
-    var(--foggy-bg-panel);
-  box-shadow:
-    0 26px 60px rgba(0, 0, 0, 0.22),
-    inset 0 1px 0 rgba(255, 255, 255, 0.03);
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
 }
 
 #foggy-mcq-question {
   color: var(--foggy-text);
-  font-size: 28px;
-  font-weight: 800;
-  line-height: 1.25;
-  text-align: center;
-}
-
-#foggy-mcq-description {
-  max-width: 620px;
-  margin: 0 auto;
-  color: var(--foggy-text-muted);
   font-size: 14px;
-  line-height: 1.7;
-  text-align: center;
+  font-weight: 400;
+  line-height: 1.6;
+  text-align: left;
 }
-
-#foggy-mcq-description > :first-child {
-  margin-top: 0;
-}
-
-#foggy-mcq-description > :last-child {
-  margin-bottom: 0;
-}
-
 
 #foggy-mcq-choices {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 10px;
 }
 
 .foggy-mcq-choice {
@@ -68,75 +44,62 @@
   -webkit-appearance: none;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 16px;
+  gap: 12px;
   width: 100%;
-  min-height: 84px;
-  padding: 18px 18px 18px 20px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 18px;
-  background: rgba(255, 255, 255, 0.025);
+  padding: 14px 16px;
+  border: 1px solid var(--foggy-border);
+  border-radius: 8px;
+  background: transparent;
   color: var(--foggy-text);
   text-align: left;
   cursor: pointer;
   transition:
-    border-color 0.16s ease,
-    background 0.16s ease,
-    transform 0.12s ease,
-    opacity 0.16s ease;
+    border-color 0.15s ease,
+    background 0.15s ease;
 }
 
 .foggy-mcq-choice:hover {
-  border-color: rgba(255, 255, 255, 0.18);
-  background: rgba(255, 255, 255, 0.04);
-  transform: translateY(-1px);
+  border-color: var(--foggy-border-hover);
+  background: oklch(0.98 0 0 / 0.03);
 }
 
 .foggy-mcq-choice.is-selected {
-  border-color: rgba(212, 184, 112, 0.55);
-  background: rgba(212, 184, 112, 0.08);
+  border-color: oklch(0.85 0.15 145);
+  background: oklch(0.85 0.15 145 / 0.06);
 }
 
 .foggy-mcq-choice.is-correct {
-  border-color: rgba(126, 200, 126, 0.4);
-  background: rgba(126, 200, 126, 0.08);
+  border-color: oklch(0.85 0.15 145 / 0.5);
+  background: oklch(0.85 0.15 145 / 0.06);
 }
 
 .foggy-mcq-choice.is-eliminated,
 .foggy-mcq-choice:disabled:not(.is-correct) {
-  background: rgba(255, 255, 255, 0.015);
-  border-color: rgba(255, 255, 255, 0.06);
+  background: transparent;
+  border-color: oklch(0.98 0 0 / 0.04);
   color: var(--foggy-text-dim);
   cursor: not-allowed;
-  transform: none;
 }
 
 .foggy-mcq-choice.is-eliminated .foggy-mcq-choice-index,
 .foggy-mcq-choice:disabled:not(.is-correct) .foggy-mcq-choice-index {
-  border-color: rgba(255, 255, 255, 0.06);
   color: var(--foggy-text-dim);
 }
 
 .foggy-mcq-choice-text {
   flex: 1;
-  font-size: 20px;
-  font-weight: 600;
-  line-height: 1.45;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.5;
 }
 
 .foggy-mcq-choice-index {
   flex: 0 0 auto;
-  min-width: 30px;
-  height: 30px;
-  padding: 0 10px;
-  border-radius: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.16);
   color: var(--foggy-text-muted);
-  font-family: var(--foggy-font-mono);
   font-size: 13px;
-  font-weight: 700;
-  line-height: 28px;
-  text-align: center;
+  font-weight: 500;
+  line-height: 1;
+  text-transform: uppercase;
 }
 
 #foggy-mcq-actions {
@@ -144,7 +107,7 @@
   align-items: center;
   justify-content: center;
   gap: 10px;
-  margin-top: 4px;
+  margin-top: 8px;
 }
 
 #foggy-mcq-primary-btn {
@@ -153,25 +116,25 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 148px;
-  height: 42px;
-  padding: 0 22px;
-  border: none;
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.1);
-  color: var(--foggy-success);
+  min-width: 120px;
+  height: 38px;
+  padding: 0 20px;
+  border: 1px solid var(--foggy-border);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--foggy-text);
   font-family: var(--foggy-font-sans);
-  font-size: 14px;
-  font-weight: 700;
+  font-size: 13px;
+  font-weight: 500;
   cursor: pointer;
   transition:
-    background 0.15s ease,
-    transform 0.1s ease,
-    color 0.15s ease;
+    border-color 0.15s ease,
+    background 0.15s ease;
 }
 
 #foggy-mcq-primary-btn:hover {
-  background: rgba(255, 255, 255, 0.15);
+  border-color: var(--foggy-border-hover);
+  background: oklch(0.98 0 0 / 0.04);
 }
 
 #foggy-mcq-primary-btn:active {
@@ -179,7 +142,7 @@
 }
 
 #foggy-mcq-primary-btn:disabled {
-  background: rgba(255, 255, 255, 0.04);
+  border-color: oklch(0.98 0 0 / 0.04);
   color: var(--foggy-text-dim);
   cursor: not-allowed;
   transform: none;
@@ -196,26 +159,6 @@
   #foggy-mcq-view {
     padding: 16px 12px 20px;
     align-items: stretch;
-  }
-
-  #foggy-mcq-panel {
-    min-height: 100%;
-    padding: 24px 18px;
-    border-radius: 20px;
-  }
-
-  #foggy-mcq-question {
-    font-size: 22px;
-  }
-
-  .foggy-mcq-choice {
-    min-height: 74px;
-    padding: 16px;
-    border-radius: 16px;
-  }
-
-  .foggy-mcq-choice-text {
-    font-size: 17px;
   }
 
   #foggy-mcq-actions,

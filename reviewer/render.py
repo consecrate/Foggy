@@ -15,6 +15,14 @@ FOGGY_REVIEW_KINDS = {
     "previewAnswer",
 }
 
+QUESTION_KINDS = {
+    "reviewQuestion",
+    "previewQuestion",
+}
+
+_serve_sequence = 0
+_active_serves: dict[int, int] = {}
+
 
 def on_card_will_show(text: str, card, kind: str) -> str:
     try:
@@ -28,7 +36,12 @@ def on_card_will_show(text: str, card, kind: str) -> str:
 
         hide_reviewer_chrome()
         assets = get_web_assets()
-        card_data = _build_card_data(card, note_kind, kind in ("reviewAnswer", "previewAnswer"))
+        card_data = _build_card_data(
+            card,
+            note_kind,
+            kind in ("reviewAnswer", "previewAnswer"),
+            _get_serve_id(card, kind),
+        )
 
         return f"""
 <div id="foggy-host"></div>
@@ -63,7 +76,7 @@ def _get_field(card, field_name: str) -> str:
     return ""
 
 
-def _build_card_data(card, note_kind: str, is_answer: bool) -> dict[str, object]:
+def _build_card_data(card, note_kind: str, is_answer: bool, serve_id: int) -> dict[str, object]:
     if note_kind == "mcq":
         question = _get_field(card, "Question")
         return {
@@ -71,9 +84,9 @@ def _build_card_data(card, note_kind: str, is_answer: bool) -> dict[str, object]
             "title": question,
             "question": question,
             "difficulty": _get_field(card, "Difficulty"),
-            "description": _get_field(card, "Description"),
             "choices": _get_field(card, "Choices"),
             "cardId": card.id,
+            "serveId": serve_id,
             "isAnswer": is_answer,
         }
 
@@ -88,8 +101,20 @@ def _build_card_data(card, note_kind: str, is_answer: bool) -> dict[str, object]
         "solution": _get_field(card, "Solution"),
         "testCases": _get_field(card, "TestCases"),
         "cardId": card.id,
+        "serveId": serve_id,
         "isAnswer": is_answer,
     }
+
+
+def _get_serve_id(card, kind: str) -> int:
+    global _serve_sequence
+
+    card_id = card.id
+    if kind in QUESTION_KINDS or card_id not in _active_serves:
+        _serve_sequence += 1
+        _active_serves[card_id] = _serve_sequence
+
+    return _active_serves[card_id]
 
 
 def _get_note_kind(card) -> str | None:

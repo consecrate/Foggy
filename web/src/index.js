@@ -39,7 +39,10 @@ function init() {
   var state = {
     activeTab: "testcase",
     cardData: cardData,
-    codeStorageKey: cardData.cardId ? "foggy:code:" + cardData.cardId : null,
+    codeStorageKey:
+      cardData.cardId && cardData.serveId
+        ? "foggy:code:" + cardData.cardId + ":" + cardData.serveId
+        : null,
     editorView: null,
     hasPassedTests: false,
     lastResult: null,
@@ -174,22 +177,9 @@ function setRunningState(running) {
   }
 
   checkButton.classList.toggle("running", running);
-
-  var iconSpan = checkButton.querySelector(".foggy-check-icon");
-  if (iconSpan) {
-    iconSpan.style.display = running ? "none" : "";
-  }
-
-  var textNode = Array.prototype.find.call(checkButton.childNodes, function (node) {
-    return node.nodeType === Node.TEXT_NODE && node.textContent.trim().length > 0;
-  });
-
-  if (textNode) {
-    textNode.textContent = running ? " Checking..." : "Check";
-    return;
-  }
-
-  checkButton.appendChild(document.createTextNode(running ? " Checking..." : "Check"));
+  checkButton.innerHTML = running
+    ? "Running..."
+    : 'Run <span class="foggy-btn-shortcut">⌘+↵</span>';
 }
 
 if (document.readyState === "loading") {
