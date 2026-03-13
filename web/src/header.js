@@ -1,10 +1,12 @@
 import { setHidden } from "./ui.js";
 
+import { getRoot } from "./root.js";
+
 export function initHeader(cardData) {
-  var headerTitle = document.getElementById("foggy-header-title");
-  var headerState = document.getElementById("foggy-header-state");
-  var langBadge = document.getElementById("foggy-lang-badge");
-  var diffBadge = document.getElementById("foggy-difficulty-badge");
+  var headerTitle = getRoot().getElementById("foggy-header-title");
+  var headerState = getRoot().getElementById("foggy-header-state");
+  var langBadge = getRoot().getElementById("foggy-lang-badge");
+  var diffBadge = getRoot().getElementById("foggy-difficulty-badge");
   var title = cardData.title || "Foggy";
   var isMcq = cardData.kind === "mcq";
   var diff = (cardData.difficulty || "").toLowerCase();

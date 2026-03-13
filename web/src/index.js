@@ -6,6 +6,7 @@ import { initIcons } from "./icons.js";
 import { initSplitGrid } from "./layout.js";
 import { initMcqCard } from "./mcq.js";
 import { renderResults, setRatingButtonsVisible } from "./results.js";
+import { setRoot, getRoot } from "./root.js";
 import { initTabs, setActiveTab } from "./tabs.js";
 import { populateTestcases } from "./testcases.js";
 import { initLeftTabs } from "./left-tabs.js";
@@ -17,6 +18,24 @@ function init() {
   }
 
   var cardData = JSON.parse(dataEl.textContent);
+
+  var host = document.getElementById("foggy-host");
+  if (!host) {
+    return;
+  }
+
+  prepareHost(host);
+
+  var shadow = host.shadowRoot || host.attachShadow({ mode: "open" });
+
+  var foggyStyle = document.getElementById("foggy-style");
+  var foggyTemplate = document.getElementById("foggy-template");
+  if (foggyStyle) {
+    shadow.innerHTML = "<style>" + foggyStyle.textContent + "</style>" + foggyTemplate.innerHTML;
+  }
+
+  setRoot(shadow);
+
   var state = {
     activeTab: "testcase",
     cardData: cardData,
@@ -36,7 +55,7 @@ function init() {
     return;
   }
 
-  document.getElementById("foggy-title").textContent = cardData.title;
+  getRoot().getElementById("foggy-title").textContent = cardData.title;
   renderDescription(cardData.description);
 
   state.editorView = initEditor(cardData, state.codeStorageKey);
@@ -67,8 +86,18 @@ function init() {
   });
 }
 
+function prepareHost(host) {
+  host.style.display = "block";
+  host.style.position = "fixed";
+  host.style.inset = "0";
+  host.style.margin = "0";
+  host.style.padding = "0";
+  host.style.border = "0";
+  host.style.overflow = "hidden";
+}
+
 function initHomeButton() {
-  var homeButton = document.getElementById("foggy-home-btn");
+  var homeButton = getRoot().getElementById("foggy-home-btn");
 
   if (homeButton) {
     homeButton.addEventListener("click", navigateHome);
@@ -76,8 +105,8 @@ function initHomeButton() {
 }
 
 function initActionButtons(onRun) {
-  var runButton = document.getElementById("foggy-run-btn");
-  var checkButton = document.getElementById("foggy-check-btn");
+  var runButton = getRoot().getElementById("foggy-run-btn");
+  var checkButton = getRoot().getElementById("foggy-check-btn");
 
   if (runButton) {
     runButton.addEventListener("click", onRun);
@@ -132,8 +161,8 @@ function buildSolutionRevealResult(state) {
 }
 
 function setRunningState(running) {
-  var runButton = document.getElementById("foggy-run-btn");
-  var checkButton = document.getElementById("foggy-check-btn");
+  var runButton = getRoot().getElementById("foggy-run-btn");
+  var checkButton = getRoot().getElementById("foggy-check-btn");
 
   if (runButton) {
     runButton.textContent = running ? "Running..." : "Run";

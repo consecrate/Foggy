@@ -13,7 +13,7 @@
 
   .foggy-case-pill {
     min-height: 38px;
-    padding: 9px 12px !important;
+    padding: 9px 12px;
   }
 
   .foggy-case-value {

@@ -1,8 +1,9 @@
+import { getRoot } from "./root.js";
 import { getStoredCode, storeCode } from "./storage.js";
 
 export function initEditor(cardData, codeStorageKey) {
   var starterCode = getStoredCode(codeStorageKey) || cardData.starterCode || "";
-  var editorView = createCodeMirror(document.getElementById("foggy-editor"), starterCode, {
+  var editorView = createCodeMirror(getRoot().getElementById("foggy-editor"), starterCode, {
     language: cardData.language,
     onChange: function (update) {
       if (update.docChanged) {

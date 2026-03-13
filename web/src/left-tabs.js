@@ -1,10 +1,11 @@
 import { createCodeMirror } from "./editor.js";
+import { getRoot } from "./root.js";
 import { setHidden } from "./ui.js";
 
 export function initLeftTabs(cardData, onSolutionAccess) {
-  var tabs = document.querySelectorAll("[data-left-tab]");
-  var problemPanel = document.getElementById("foggy-problem");
-  var solutionPanel = document.getElementById("foggy-solution");
+  var tabs = getRoot().querySelectorAll("[data-left-tab]");
+  var problemPanel = getRoot().getElementById("foggy-problem");
+  var solutionPanel = getRoot().getElementById("foggy-solution");
   var solutionView = null;
 
   tabs.forEach(function (tab) {
@@ -30,7 +31,7 @@ export function initLeftTabs(cardData, onSolutionAccess) {
 }
 
 function renderSolution(code, lang) {
-  var container = document.getElementById("foggy-solution-code");
+  var container = getRoot().getElementById("foggy-solution-code");
   container.replaceChildren();
   return createCodeMirror(container, code, {
     language: lang,

@@ -4849,9 +4849,18 @@
     }
   }
 
+  // web/src/root.js
+  var _root = document;
+  function setRoot(shadowRoot) {
+    _root = shadowRoot;
+  }
+  function getRoot() {
+    return _root;
+  }
+
   // web/src/description.js
   function renderDescription(markdown, target) {
-    var container = target || document.getElementById("foggy-description");
+    var container = target || getRoot().getElementById("foggy-description");
     container.textContent = "";
     if (!markdown) {
       return;
@@ -4977,7 +4986,7 @@
   // web/src/editor.js
   function initEditor(cardData, codeStorageKey) {
     var starterCode = getStoredCode(codeStorageKey) || cardData.starterCode || "";
-    var editorView = createCodeMirror(document.getElementById("foggy-editor"), starterCode, {
+    var editorView = createCodeMirror(getRoot().getElementById("foggy-editor"), starterCode, {
       language: cardData.language,
       onChange: function(update) {
         if (update.docChanged) {
@@ -5126,10 +5135,10 @@
 
   // web/src/header.js
   function initHeader(cardData) {
-    var headerTitle = document.getElementById("foggy-header-title");
-    var headerState = document.getElementById("foggy-header-state");
-    var langBadge = document.getElementById("foggy-lang-badge");
-    var diffBadge = document.getElementById("foggy-difficulty-badge");
+    var headerTitle = getRoot().getElementById("foggy-header-title");
+    var headerState = getRoot().getElementById("foggy-header-state");
+    var langBadge = getRoot().getElementById("foggy-lang-badge");
+    var diffBadge = getRoot().getElementById("foggy-difficulty-badge");
     var title = cardData.title || "Foggy";
     var isMcq = cardData.kind === "mcq";
     var diff = (cardData.difficulty || "").toLowerCase();
@@ -5163,7 +5172,7 @@
     check: '<svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M1.5 4.875C1.5 3.01104 3.01104 1.5 4.875 1.5C6.20018 1.5 7.34838 2.26364 7.901 3.37829C8.1902 3.96162 8.79547 4.5 9.60112 4.5H12.25C13.4926 4.5 14.5 5.50736 14.5 6.75C14.5 7.42688 14.202 8.03329 13.7276 8.44689L13.1622 8.93972L14.1479 10.0704L14.7133 9.57758C15.5006 8.89123 16 7.8785 16 6.75C16 4.67893 14.3211 3 12.25 3H9.60112C9.51183 3 9.35322 2.93049 9.2449 2.71201C8.44888 1.1064 6.79184 0 4.875 0C2.18261 0 0 2.18261 0 4.875V6.40385C0 7.69502 0.598275 8.84699 1.52982 9.59656L2.11415 10.0667L3.0545 8.89808L2.47018 8.42791C1.87727 7.95083 1.5 7.22166 1.5 6.40385V4.875ZM7.29289 7.39645C7.68342 7.00592 8.31658 7.00592 8.70711 7.39645L11.7803 10.4697L12.3107 11L11.25 12.0607L10.7197 11.5303L8.75 9.56066V15.25V16H7.25V15.25V9.56066L5.28033 11.5303L4.75 12.0607L3.68934 11L4.21967 10.4697L7.29289 7.39645Z" fill="currentColor"/></svg>'
   };
   function initIcons() {
-    document.querySelectorAll("[data-icon]").forEach(function(iconEl) {
+    getRoot().querySelectorAll("[data-icon]").forEach(function(iconEl) {
       var iconName = iconEl.getAttribute("data-icon");
       var svg = ICON_SVGS[iconName];
       if (!svg) {
@@ -5185,7 +5194,7 @@
       columnGutters: [
         {
           track: 1,
-          element: document.getElementById("foggy-gutter-col")
+          element: getRoot().getElementById("foggy-gutter-col")
         }
       ],
       columnMinSizes: { 0: 200, 2: 300 }
@@ -5194,7 +5203,7 @@
       rowGutters: [
         {
           track: 1,
-          element: document.getElementById("foggy-gutter-row")
+          element: getRoot().getElementById("foggy-gutter-row")
         }
       ],
       rowMinSizes: { 0: 36, 2: 36 }
@@ -5222,13 +5231,13 @@
     renderMcq(state);
   }
   function prepareLayout(cardData) {
-    var container = document.getElementById("foggy-container");
-    var grid = document.getElementById("foggy-grid");
-    var mcqView = document.getElementById("foggy-mcq-view");
-    var headerRun = document.getElementById("foggy-run-btn");
-    var headerCheck = document.getElementById("foggy-check-btn");
-    var question = document.getElementById("foggy-mcq-question");
-    var description = document.getElementById("foggy-mcq-description");
+    var container = getRoot().getElementById("foggy-container");
+    var grid = getRoot().getElementById("foggy-grid");
+    var mcqView = getRoot().getElementById("foggy-mcq-view");
+    var headerRun = getRoot().getElementById("foggy-run-btn");
+    var headerCheck = getRoot().getElementById("foggy-check-btn");
+    var question = getRoot().getElementById("foggy-mcq-question");
+    var description = getRoot().getElementById("foggy-mcq-description");
     container.classList.add("foggy-container--mcq");
     setHidden(grid, true);
     setHidden(mcqView, false);
@@ -5243,13 +5252,13 @@
     setHidden(description, !cardData.description);
   }
   function bindPrimaryAction(state) {
-    var button = document.getElementById("foggy-mcq-primary-btn");
+    var button = getRoot().getElementById("foggy-mcq-primary-btn");
     button.addEventListener("click", function() {
       handlePrimaryAction(state);
     });
   }
   function bindRatingActions() {
-    var row = document.getElementById("foggy-mcq-rating-row");
+    var row = getRoot().getElementById("foggy-mcq-rating-row");
     row.replaceChildren();
     FIRST_TRY_RATINGS.forEach(function(rating) {
       var button = document.createElement("button");
@@ -5289,7 +5298,7 @@
     renderActions(state);
   }
   function renderChoices(state) {
-    var container = document.getElementById("foggy-mcq-choices");
+    var container = getRoot().getElementById("foggy-mcq-choices");
     container.replaceChildren();
     state.choices.forEach(function(choice, index2) {
       var button = document.createElement("button");
@@ -5325,8 +5334,8 @@
     });
   }
   function renderActions(state) {
-    var primaryButton = document.getElementById("foggy-mcq-primary-btn");
-    var ratingRow = document.getElementById("foggy-mcq-rating-row");
+    var primaryButton = getRoot().getElementById("foggy-mcq-primary-btn");
+    var ratingRow = getRoot().getElementById("foggy-mcq-rating-row");
     if (state.solvedOnFirstTry) {
       setHidden(primaryButton, true);
       setHidden(ratingRow, false);
@@ -5416,7 +5425,7 @@
     });
   }
   function populateTestcases(cardData) {
-    var container = document.getElementById("foggy-testcase-content");
+    var container = getRoot().getElementById("foggy-testcase-content");
     var testCases = parseTestCases(cardData);
     container.replaceChildren();
     if (!testCases.length) {
@@ -5491,7 +5500,7 @@
     { ease: 4, label: "Easy", cls: "easy" }
   ];
   function renderResults(result, cardData) {
-    var container = document.getElementById("foggy-results-content");
+    var container = getRoot().getElementById("foggy-results-content");
     var shell = document.createElement("div");
     shell.className = "foggy-result-shell";
     container.replaceChildren();
@@ -5568,7 +5577,7 @@
     container.appendChild(shell);
   }
   function setRatingButtonsVisible(visible) {
-    var existing = document.getElementById("foggy-rating-row");
+    var existing = getRoot().getElementById("foggy-rating-row");
     if (!visible) {
       if (existing) {
         existing.remove();
@@ -5591,7 +5600,7 @@
       });
       row.appendChild(btn);
     });
-    document.getElementById("foggy-bottom-panel").appendChild(row);
+    getRoot().getElementById("foggy-bottom-panel").appendChild(row);
   }
   function buildResultHeader(result, focusIndex) {
     var header = document.createElement("section");
@@ -5703,7 +5712,7 @@
 
   // web/src/tabs.js
   function initTabs(onSelect) {
-    document.querySelectorAll(".foggy-panel-tab[data-tab]").forEach(function(tab) {
+    getRoot().querySelectorAll(".foggy-panel-tab[data-tab]").forEach(function(tab) {
       tab.addEventListener("click", function() {
         onSelect(tab.getAttribute("data-tab") || "testcase");
       });
@@ -5711,19 +5720,19 @@
   }
   function setActiveTab(target, state) {
     state.activeTab = target;
-    document.querySelectorAll(".foggy-panel-tab[data-tab]").forEach(function(tab) {
+    getRoot().querySelectorAll(".foggy-panel-tab[data-tab]").forEach(function(tab) {
       var isActive = tab.getAttribute("data-tab") === target;
       tab.classList.toggle("active", isActive);
     });
-    setHidden(document.getElementById("foggy-tab-testcase"), target !== "testcase");
-    setHidden(document.getElementById("foggy-tab-result"), target !== "result");
+    setHidden(getRoot().getElementById("foggy-tab-testcase"), target !== "testcase");
+    setHidden(getRoot().getElementById("foggy-tab-result"), target !== "result");
   }
 
   // web/src/left-tabs.js
   function initLeftTabs(cardData, onSolutionAccess) {
-    var tabs = document.querySelectorAll("[data-left-tab]");
-    var problemPanel = document.getElementById("foggy-problem");
-    var solutionPanel = document.getElementById("foggy-solution");
+    var tabs = getRoot().querySelectorAll("[data-left-tab]");
+    var problemPanel = getRoot().getElementById("foggy-problem");
+    var solutionPanel = getRoot().getElementById("foggy-solution");
     var solutionView = null;
     tabs.forEach(function(tab) {
       tab.addEventListener("click", function() {
@@ -5743,7 +5752,7 @@
     });
   }
   function renderSolution(code, lang) {
-    var container = document.getElementById("foggy-solution-code");
+    var container = getRoot().getElementById("foggy-solution-code");
     container.replaceChildren();
     return createCodeMirror(container, code, {
       language: lang,
@@ -5759,6 +5768,18 @@
       return;
     }
     var cardData = JSON.parse(dataEl.textContent);
+    var host = document.getElementById("foggy-host");
+    if (!host) {
+      return;
+    }
+    prepareHost(host);
+    var shadow = host.shadowRoot || host.attachShadow({ mode: "open" });
+    var foggyStyle = document.getElementById("foggy-style");
+    var foggyTemplate = document.getElementById("foggy-template");
+    if (foggyStyle) {
+      shadow.innerHTML = "<style>" + foggyStyle.textContent + "</style>" + foggyTemplate.innerHTML;
+    }
+    setRoot(shadow);
     var state = {
       activeTab: "testcase",
       cardData,
@@ -5775,7 +5796,7 @@
       initMcqCard(cardData);
       return;
     }
-    document.getElementById("foggy-title").textContent = cardData.title;
+    getRoot().getElementById("foggy-title").textContent = cardData.title;
     renderDescription(cardData.description);
     state.editorView = initEditor(cardData, state.codeStorageKey);
     initActionButtons(function() {
@@ -5801,15 +5822,24 @@
       setRatingButtonsVisible(state.hasPassedTests || state.solutionRevealedBeforePass);
     });
   }
+  function prepareHost(host) {
+    host.style.display = "block";
+    host.style.position = "fixed";
+    host.style.inset = "0";
+    host.style.margin = "0";
+    host.style.padding = "0";
+    host.style.border = "0";
+    host.style.overflow = "hidden";
+  }
   function initHomeButton() {
-    var homeButton = document.getElementById("foggy-home-btn");
+    var homeButton = getRoot().getElementById("foggy-home-btn");
     if (homeButton) {
       homeButton.addEventListener("click", navigateHome);
     }
   }
   function initActionButtons(onRun) {
-    var runButton = document.getElementById("foggy-run-btn");
-    var checkButton = document.getElementById("foggy-check-btn");
+    var runButton = getRoot().getElementById("foggy-run-btn");
+    var checkButton = getRoot().getElementById("foggy-check-btn");
     if (runButton) {
       runButton.addEventListener("click", onRun);
     }
@@ -5854,8 +5884,8 @@
     };
   }
   function setRunningState(running) {
-    var runButton = document.getElementById("foggy-run-btn");
-    var checkButton = document.getElementById("foggy-check-btn");
+    var runButton = getRoot().getElementById("foggy-run-btn");
+    var checkButton = getRoot().getElementById("foggy-check-btn");
     if (runButton) {
       runButton.textContent = running ? "Running..." : "Run";
       runButton.classList.toggle("running", running);

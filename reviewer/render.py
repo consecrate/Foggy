@@ -31,8 +31,9 @@ def on_card_will_show(text: str, card, kind: str) -> str:
         card_data = _build_card_data(card, note_kind, kind in ("reviewAnswer", "previewAnswer"))
 
         return f"""
-<style>{assets.style_css}</style>
-{assets.template_html}
+<div id="foggy-host"></div>
+<script id="foggy-style" type="text/plain">{assets.style_css}</script>
+<template id="foggy-template">{assets.template_html}</template>
 <script id="foggy-data" type="application/json">
 {json.dumps(card_data)}
 </script>

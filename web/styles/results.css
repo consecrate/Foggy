@@ -51,7 +51,6 @@
 
 .foggy-result-count {
   flex: 0 0 auto;
-  padding-top: 4px;
   font-family: var(--foggy-font-mono);
   font-size: 13px;
   font-weight: 700;

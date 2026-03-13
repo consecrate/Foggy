@@ -1,4 +1,5 @@
 import { answerCard } from "./bridge.js";
+import { getRoot } from "./root.js";
 import { renderDescription } from "./description.js";
 import { setHidden } from "./ui.js";
 
@@ -25,13 +26,13 @@ export function initMcqCard(cardData) {
 }
 
 function prepareLayout(cardData) {
-  var container = document.getElementById("foggy-container");
-  var grid = document.getElementById("foggy-grid");
-  var mcqView = document.getElementById("foggy-mcq-view");
-  var headerRun = document.getElementById("foggy-run-btn");
-  var headerCheck = document.getElementById("foggy-check-btn");
-  var question = document.getElementById("foggy-mcq-question");
-  var description = document.getElementById("foggy-mcq-description");
+  var container = getRoot().getElementById("foggy-container");
+  var grid = getRoot().getElementById("foggy-grid");
+  var mcqView = getRoot().getElementById("foggy-mcq-view");
+  var headerRun = getRoot().getElementById("foggy-run-btn");
+  var headerCheck = getRoot().getElementById("foggy-check-btn");
+  var question = getRoot().getElementById("foggy-mcq-question");
+  var description = getRoot().getElementById("foggy-mcq-description");
 
   container.classList.add("foggy-container--mcq");
   setHidden(grid, true);
@@ -50,14 +51,14 @@ function prepareLayout(cardData) {
 }
 
 function bindPrimaryAction(state) {
-  var button = document.getElementById("foggy-mcq-primary-btn");
+  var button = getRoot().getElementById("foggy-mcq-primary-btn");
   button.addEventListener("click", function () {
     handlePrimaryAction(state);
   });
 }
 
 function bindRatingActions() {
-  var row = document.getElementById("foggy-mcq-rating-row");
+  var row = getRoot().getElementById("foggy-mcq-rating-row");
   row.replaceChildren();
 
   FIRST_TRY_RATINGS.forEach(function (rating) {
@@ -105,7 +106,7 @@ function renderMcq(state) {
 }
 
 function renderChoices(state) {
-  var container = document.getElementById("foggy-mcq-choices");
+  var container = getRoot().getElementById("foggy-mcq-choices");
   container.replaceChildren();
 
   state.choices.forEach(function (choice, index) {
@@ -150,8 +151,8 @@ function renderChoices(state) {
 }
 
 function renderActions(state) {
-  var primaryButton = document.getElementById("foggy-mcq-primary-btn");
-  var ratingRow = document.getElementById("foggy-mcq-rating-row");
+  var primaryButton = getRoot().getElementById("foggy-mcq-primary-btn");
+  var ratingRow = getRoot().getElementById("foggy-mcq-rating-row");
 
   if (state.solvedOnFirstTry) {
     setHidden(primaryButton, true);

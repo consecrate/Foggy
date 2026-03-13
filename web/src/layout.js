@@ -1,3 +1,5 @@
+import { getRoot } from "./root.js";
+
 export function initSplitGrid() {
   var splitGrid =
     window.SplitGrid && window.SplitGrid.default
@@ -13,7 +15,7 @@ export function initSplitGrid() {
     columnGutters: [
       {
         track: 1,
-        element: document.getElementById("foggy-gutter-col"),
+        element: getRoot().getElementById("foggy-gutter-col"),
       },
     ],
     columnMinSizes: { 0: 200, 2: 300 },
@@ -23,7 +25,7 @@ export function initSplitGrid() {
     rowGutters: [
       {
         track: 1,
-        element: document.getElementById("foggy-gutter-row"),
+        element: getRoot().getElementById("foggy-gutter-row"),
       },
     ],
     rowMinSizes: { 0: 36, 2: 36 },

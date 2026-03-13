@@ -1,4 +1,5 @@
 import { answerCard } from "./bridge.js";
+import { getRoot } from "./root.js";
 import { formatSerializedResult, hasDisplayValue } from "./format.js";
 import {
   createDetailField,
@@ -18,7 +19,7 @@ var RATINGS = [
 ];
 
 export function renderResults(result, cardData) {
-  var container = document.getElementById("foggy-results-content");
+  var container = getRoot().getElementById("foggy-results-content");
   var shell = document.createElement("div");
   shell.className = "foggy-result-shell";
 
@@ -115,7 +116,7 @@ export function renderResults(result, cardData) {
 }
 
 export function setRatingButtonsVisible(visible) {
-  var existing = document.getElementById("foggy-rating-row");
+  var existing = getRoot().getElementById("foggy-rating-row");
 
   if (!visible) {
     if (existing) {
@@ -143,7 +144,7 @@ export function setRatingButtonsVisible(visible) {
     row.appendChild(btn);
   });
 
-  document.getElementById("foggy-bottom-panel").appendChild(row);
+  getRoot().getElementById("foggy-bottom-panel").appendChild(row);
 }
 
 function buildResultHeader(result, focusIndex) {

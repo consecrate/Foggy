@@ -1,7 +1,9 @@
 import { fromMarkdown } from "mdast-util-from-markdown";
 
+import { getRoot } from "./root.js";
+
 export function renderDescription(markdown, target) {
-  var container = target || document.getElementById("foggy-description");
+  var container = target || getRoot().getElementById("foggy-description");
   container.textContent = "";
 
   if (!markdown) {

@@ -1,4 +1,5 @@
 import { formatJsonValue } from "./format.js";
+import { getRoot } from "./root.js";
 import { renderHint, renderInputSection, renderValueSection, setHidden } from "./ui.js";
 
 export function parseTestCases(cardData) {
@@ -35,7 +36,7 @@ export function parseTestCases(cardData) {
 }
 
 export function populateTestcases(cardData) {
-  var container = document.getElementById("foggy-testcase-content");
+  var container = getRoot().getElementById("foggy-testcase-content");
   var testCases = parseTestCases(cardData);
 
   container.replaceChildren();

@@ -1,4 +1,4 @@
-:root {
+:host {
   --foggy-bg: #1a1a1a;
   --foggy-bg-muted: #151515;
   --foggy-bg-panel: #222222;
@@ -32,12 +32,16 @@
   --foggy-font-sans:
     -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --foggy-font-mono: "SF Mono", "Fira Code", "Cascadia Code", monospace;
-}
 
-.card {
-  margin: 0 !important;
-  padding: 0 !important;
-  background: var(--foggy-bg) !important;
+  display: block;
+  position: fixed;
+  inset: 0;
+  margin: 0;
+  padding: 0;
+  background: var(--foggy-bg);
+  color: var(--foggy-text);
+  font-family: var(--foggy-font-sans);
+  overflow: hidden;
 }
 
 * {
@@ -46,18 +50,11 @@
   box-sizing: border-box;
 }
 
-body {
-  background: var(--foggy-bg);
-  color: var(--foggy-text);
-  font-family: var(--foggy-font-sans);
-  overflow: hidden;
-}
-
 #foggy-container {
   display: flex;
   flex-direction: column;
-  height: 100vh;
-  width: 100vw;
+  height: 100%;
+  width: 100%;
   background: var(--foggy-bg);
 }
 
@@ -284,11 +281,11 @@ body {
   color: var(--foggy-text-muted);
 }
 
-#foggy-problem #foggy-description > :first-child {
+#foggy-problem #foggy-description> :first-child {
   margin-top: 0;
 }
 
-#foggy-problem #foggy-description > :last-child {
+#foggy-problem #foggy-description> :last-child {
   margin-bottom: 0;
 }
 
@@ -359,7 +356,7 @@ body {
   padding: 0;
 }
 
-#foggy-problem #foggy-description li + li {
+#foggy-problem #foggy-description li+li {
   margin-top: 6px;
 }
 
@@ -650,10 +647,21 @@ body {
   background: rgba(255, 255, 255, 0.1);
 }
 
-.foggy-rating-btn--again { color: #ef4444; }
-.foggy-rating-btn--hard  { color: #f59e0b; }
-.foggy-rating-btn--good  { color: #3b82f6; }
-.foggy-rating-btn--easy  { color: #22c55e; }
+.foggy-rating-btn--again {
+  color: #ef4444;
+}
+
+.foggy-rating-btn--hard {
+  color: #f59e0b;
+}
+
+.foggy-rating-btn--good {
+  color: #3b82f6;
+}
+
+.foggy-rating-btn--easy {
+  color: #22c55e;
+}
 
 .foggy-result-header--reveal {
   border-color: rgba(212, 184, 112, 0.18);
@@ -671,9 +679,9 @@ body {
 
 .foggy-case-pill {
   box-sizing: border-box;
-  margin-left: 0 !important;
+  margin-left: 0;
   min-height: 40px;
-  padding: 10px 14px !important;
+  padding: 10px 14px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -685,10 +693,10 @@ body {
   white-space: nowrap;
   color: var(--foggy-text);
   background: var(--foggy-case-pill-bg);
-  border: 1px solid var(--foggy-case-pill-edge) !important;
-  border-radius: 8px !important;
-  box-shadow: none !important;
-  outline: none !important;
+  border: 1px solid var(--foggy-case-pill-edge);
+  border-radius: 8px;
+  box-shadow: none;
+  outline: none;
   cursor: pointer;
   transition:
     color 0.15s ease,
@@ -697,8 +705,8 @@ body {
 }
 
 .foggy-case-pill--result {
-  padding-right: 16px !important;
-  padding-left: 12px !important;
+  padding-right: 16px;
+  padding-left: 12px;
 }
 
 .foggy-case-pill:hover,
@@ -899,7 +907,6 @@ body {
 
 .foggy-result-count {
   flex: 0 0 auto;
-  padding-top: 4px;
   font-family: var(--foggy-font-mono);
   font-size: 13px;
   font-weight: 700;
@@ -957,11 +964,11 @@ body {
   text-align: center;
 }
 
-#foggy-mcq-description > :first-child {
+#foggy-mcq-description> :first-child {
   margin-top: 0;
 }
 
-#foggy-mcq-description > :last-child {
+#foggy-mcq-description> :last-child {
   margin-bottom: 0;
 }
 
@@ -1155,7 +1162,7 @@ body {
 
   .foggy-case-pill {
     min-height: 38px;
-    padding: 9px 12px !important;
+    padding: 9px 12px;
   }
 
   .foggy-case-value {
