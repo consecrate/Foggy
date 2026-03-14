@@ -1,11 +1,12 @@
 import { answerCard } from "./bridge.js";
+import { renderCodeBlock } from "./code-block.js";
 import { getRoot } from "./root.js";
 
 import { setHidden } from "./ui.js";
 
 var FIRST_TRY_RATINGS = [
   { ease: 2, label: "Hard", cls: "hard" },
-  { ease: 4, label: "Easy", cls: "easy" },
+  { ease: 3, label: "Good", cls: "good" },
 ];
 
 export function initMcqCard(cardData) {
@@ -16,7 +17,9 @@ export function initMcqCard(cardData) {
     hasValidAnswer: choiceConfig.valid,
     hadWrongAttempt: false,
     solvedOnFirstTry: false,
+    pendingContinue: false,
     selectedId: null,
+    lastEliminatedChoice: null,
   };
 
   prepareLayout(cardData);
@@ -30,29 +33,51 @@ function prepareLayout(cardData) {
   var grid = getRoot().getElementById("foggy-grid");
   var mcqView = getRoot().getElementById("foggy-mcq-view");
   var headerRun = getRoot().getElementById("foggy-run-btn");
-  var headerCheck = getRoot().getElementById("foggy-check-btn");
+  var mcqActions = getRoot().getElementById("foggy-mcq-actions");
   var question = getRoot().getElementById("foggy-mcq-question");
   container.classList.add("foggy-container--mcq");
   setHidden(grid, true);
   setHidden(mcqView, false);
   setHidden(headerRun, true);
-  setHidden(headerCheck, true);
+  setHidden(mcqActions, true);
 
   question.textContent = cardData.question || cardData.title || "Untitled question";
+
+  if (cardData.code && cardData.code.snippet) {
+    var lineCount = cardData.code.snippet.split("\n").length;
+
+    if (lineCount > 10) {
+      var codePanel = getRoot().getElementById("foggy-mcq-code-panel");
+      mcqView.classList.add("has-code");
+      setHidden(codePanel, false);
+      renderCodeBlock(codePanel, cardData.code.snippet, cardData.code.language);
+    } else {
+      mcqView.classList.add("has-code-inline");
+      var inlineCode = document.createElement("div");
+      inlineCode.id = "foggy-mcq-code-inline";
+      var panel = getRoot().getElementById("foggy-mcq-panel");
+      var choices = getRoot().getElementById("foggy-mcq-choices");
+      panel.insertBefore(inlineCode, choices);
+      renderCodeBlock(inlineCode, cardData.code.snippet, cardData.code.language);
+    }
+  }
 }
 
 function bindPrimaryAction(state) {
-  var button = getRoot().getElementById("foggy-mcq-primary-btn");
+  var button = getRoot().getElementById("foggy-check-btn");
   button.addEventListener("click", function () {
     handlePrimaryAction(state);
   });
 }
 
 function bindRatingActions() {
-  var row = getRoot().getElementById("foggy-mcq-rating-row");
-  row.replaceChildren();
+  var bar = getRoot().getElementById("foggy-bottom-bar");
+  var row = document.createElement("div");
+  row.id = "foggy-mcq-rating-row";
+  row.className = "foggy-rating-row is-hidden";
 
-  FIRST_TRY_RATINGS.forEach(function (rating) {
+  var reversed = FIRST_TRY_RATINGS.slice().reverse();
+  reversed.forEach(function (rating) {
     var button = document.createElement("button");
     button.type = "button";
     button.className = "foggy-rating-btn foggy-rating-btn--" + rating.cls;
@@ -62,9 +87,22 @@ function bindRatingActions() {
     });
     row.appendChild(button);
   });
+
+  var checkBtn = getRoot().getElementById("foggy-check-btn");
+  bar.insertBefore(row, checkBtn);
 }
 
 function handlePrimaryAction(state) {
+  if (state.pendingContinue) {
+    answerCard(state.hadWrongAttempt ? 1 : 3);
+    return;
+  }
+
+  if (state.solvedOnFirstTry) {
+    answerCard(3);
+    return;
+  }
+
   if (!state.hasValidAnswer || !state.selectedId) {
     return;
   }
@@ -76,7 +114,8 @@ function handlePrimaryAction(state) {
 
   if (selectedChoice.isCorrect) {
     if (state.hadWrongAttempt) {
-      answerCard(1);
+      state.pendingContinue = true;
+      renderMcq(state);
       return;
     }
 
@@ -86,6 +125,7 @@ function handlePrimaryAction(state) {
   }
 
   selectedChoice.isEliminated = true;
+  state.lastEliminatedChoice = selectedChoice;
   state.selectedId = null;
   state.hadWrongAttempt = true;
   renderMcq(state);
@@ -93,6 +133,7 @@ function handlePrimaryAction(state) {
 
 function renderMcq(state) {
   renderChoices(state);
+  renderFeedback(state);
   renderActions(state);
 }
 
@@ -103,7 +144,7 @@ function renderChoices(state) {
   state.choices.forEach(function (choice, index) {
     var button = document.createElement("button");
     var isSelected = state.selectedId === choice.id;
-    var isSolvedCorrect = state.solvedOnFirstTry && choice.isCorrect;
+    var isSolvedCorrect = (state.solvedOnFirstTry || state.pendingContinue) && choice.isCorrect;
 
     button.type = "button";
     button.className = "foggy-mcq-choice";
@@ -120,7 +161,7 @@ function renderChoices(state) {
       button.classList.add("is-correct");
     }
 
-    button.disabled = choice.isEliminated || state.solvedOnFirstTry || !state.hasValidAnswer;
+    button.disabled = choice.isEliminated || state.solvedOnFirstTry || state.pendingContinue || !state.hasValidAnswer;
 
     var text = document.createElement("span");
     text.className = "foggy-mcq-choice-text";
@@ -128,10 +169,10 @@ function renderChoices(state) {
 
     var indexBadge = document.createElement("span");
     indexBadge.className = "foggy-mcq-choice-index";
-    indexBadge.textContent = String.fromCharCode(65 + index);
+    indexBadge.textContent = String(index + 1);
 
-    button.appendChild(indexBadge);
     button.appendChild(text);
+    button.appendChild(indexBadge);
     button.addEventListener("click", function () {
       state.selectedId = choice.id;
       renderMcq(state);
@@ -141,20 +182,62 @@ function renderChoices(state) {
   });
 }
 
-function renderActions(state) {
-  var primaryButton = getRoot().getElementById("foggy-mcq-primary-btn");
-  var ratingRow = getRoot().getElementById("foggy-mcq-rating-row");
+function renderFeedback(state) {
+  var container = getRoot().getElementById("foggy-mcq-feedback");
+  var showCorrect = state.solvedOnFirstTry || (state.pendingContinue && !state.solvedOnFirstTry);
+  var showWrong = !!state.lastEliminatedChoice;
 
-  if (state.solvedOnFirstTry) {
-    setHidden(primaryButton, true);
-    setHidden(ratingRow, false);
+  if (!showCorrect && !showWrong) {
+    setHidden(container, true);
     return;
   }
 
-  setHidden(primaryButton, false);
+  container.replaceChildren();
+
+  var feedbackChoice = showCorrect
+    ? state.choices.find(function (c) { return c.isCorrect; })
+    : state.lastEliminatedChoice;
+  var notes = feedbackChoice ? feedbackChoice.notes : "";
+
+  container.className = showCorrect ? "foggy-mcq-feedback is-correct" : "foggy-mcq-feedback is-wrong";
+
+  var label = document.createElement("span");
+  label.className = "foggy-mcq-feedback-label";
+  label.textContent = showCorrect ? "\u2713 Correct" : "\u2717 Wrong";
+  container.appendChild(label);
+
+  if (notes) {
+    var notesEl = document.createElement("p");
+    notesEl.className = "foggy-mcq-feedback-notes";
+    notesEl.textContent = notes;
+    container.appendChild(notesEl);
+  }
+
+  setHidden(container, false);
+}
+
+function renderActions(state) {
+  var checkBtn = getRoot().getElementById("foggy-check-btn");
+  var ratingRow = getRoot().getElementById("foggy-mcq-rating-row");
+
+  if (state.pendingContinue) {
+    setHidden(ratingRow, true);
+    checkBtn.innerHTML = "Continue";
+    checkBtn.disabled = false;
+    return;
+  }
+
+  if (state.solvedOnFirstTry) {
+    setHidden(ratingRow, false);
+    checkBtn.innerHTML = "Continue";
+    checkBtn.disabled = false;
+    return;
+  }
+
   setHidden(ratingRow, true);
-  primaryButton.textContent = state.hadWrongAttempt ? "Continue" : "Check";
-  primaryButton.disabled = !state.hasValidAnswer || !state.selectedId;
+  var label = "Check";
+  checkBtn.innerHTML = label;
+  checkBtn.disabled = !state.hasValidAnswer || !state.selectedId;
 }
 
 function buildChoices(rawChoices) {
@@ -191,6 +274,7 @@ function parseJsonChoices(rawChoices) {
         text: String(item.text || ""),
         isCorrect: item.correct === true,
         isEliminated: false,
+        notes: item.notes ? String(item.notes) : "",
       };
     }),
     valid: true,

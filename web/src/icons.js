@@ -10,7 +10,11 @@ export const ICON_SVGS = {
 };
 
 export function initIcons() {
-  getRoot().querySelectorAll("[data-icon]").forEach(function (iconEl) {
+  injectIcons(getRoot());
+}
+
+export function injectIcons(root) {
+  root.querySelectorAll("[data-icon]").forEach(function (iconEl) {
     var iconName = iconEl.getAttribute("data-icon");
     var svg = ICON_SVGS[iconName];
 

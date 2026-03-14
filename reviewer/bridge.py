@@ -5,7 +5,8 @@ import json
 from aqt import mw
 
 from .. import executor
-from .chrome import return_to_home
+from .chrome import return_to_home, show_reviewer_bottom_bar
+from .render import continue_wrapped_review_cycle, reset_wrapped_review_state
 
 
 def on_js_message(handled: tuple[bool, object], message: str, context) -> tuple[bool, object]:
@@ -54,7 +55,22 @@ def on_js_message(handled: tuple[bool, object], message: str, context) -> tuple[
         return (True, None)
 
     if action == "home":
+        reset_wrapped_review_state()
         return_to_home()
+        return (True, None)
+
+    if action == "reward-continue":
+        continue_wrapped_review_cycle()
+        show_reviewer_bottom_bar()
+        return (True, None)
+
+    if action == "info":
+        try:
+            reviewer = getattr(mw, "reviewer", None)
+            if reviewer is not None:
+                reviewer.on_card_info()
+        except Exception:
+            pass
         return (True, None)
 
     if action == "answer":

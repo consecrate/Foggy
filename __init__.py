@@ -8,6 +8,7 @@ from aqt.qt import QAction, QMenu
 
 CODE_DECK_NAME = "Foggy Code"
 MCQ_DECK_NAME = "Foggy MCQ"
+CODE_MCQ_DECK_NAME = "Foggy Code MCQ"
 
 CODE_SAMPLE_CARD = {
     "Title": "Hello World",
@@ -24,12 +25,29 @@ MCQ_SAMPLE_CARD = {
     "Question": "A duck is pair-programming with you. Why did your code suddenly start working?",
     "Difficulty": "Easy",
     "Choices": json.dumps([
-        {"text": "The duck stared the bug into submission."},
-        {"text": "You finally explained the problem out loud.", "correct": True},
-        {"text": "Python got nervous and fixed itself."},
-        {"text": "The compiler wanted to impress the duck."},
+        {"text": "The duck stared the bug into submission.", "notes": "While intimidation tactics may work on teammates, bugs are unfortunately immune to staring."},
+        {"text": "You finally explained the problem out loud.", "correct": True, "notes": "Rubber duck debugging works because explaining your code out loud forces you to think through each step carefully, often revealing the mistake yourself."},
+        {"text": "Python got nervous and fixed itself.", "notes": "Python is many things, but self-aware is not one of them — at least not yet."},
+        {"text": "The compiler wanted to impress the duck.", "notes": "Compilers are deterministic and do not have feelings, no matter how much we wish they did."},
     ]),
 }
+
+CODE_MCQ_SAMPLE_CARD = {
+    "Question": "What does this function return when called with x = 3?",
+    "Difficulty": "Easy",
+    "Choices": json.dumps([
+        {"text": "9", "correct": True, "notes": "The function squares its argument: 3 * 3 = 9."},
+        {"text": "6", "notes": "That would be 3 + 3 or 3 * 2, not 3 ** 2."},
+        {"text": "3", "notes": "The function modifies x before returning it."},
+        {"text": "27", "notes": "That would be 3 ** 3, not 3 ** 2."},
+    ]),
+    "Code": json.dumps({
+        "snippet": "def mystery(x):\n    return x ** 2",
+        "language": "python",
+    }),
+}
+
+_TEST_DECK_NAMES = (CODE_DECK_NAME, MCQ_DECK_NAME, CODE_MCQ_DECK_NAME)
 
 
 def _on_profile_loaded() -> None:
@@ -70,12 +88,40 @@ def _initialize() -> None:
         sample_fields=MCQ_SAMPLE_CARD,
         matcher=_is_mcq_sample,
     )
+    code_mcq_added = _ensure_sample_note(
+        col=col,
+        deck_name=CODE_MCQ_DECK_NAME,
+        notetype=mcq_notetype,
+        sample_fields=CODE_MCQ_SAMPLE_CARD,
+        matcher=_is_code_mcq_sample,
+    )
 
     showInfo(
         "Foggy initialized!\n"
-        + f"{CODE_DECK_NAME}: {'added Hello World' if code_added else 'Hello World already exists'}\n"
-        + f"{MCQ_DECK_NAME}: {'added duck debugging MCQ' if mcq_added else 'duck debugging MCQ already exists'}"
+        + f"{CODE_DECK_NAME}: {'added Hello World' if code_added else 'already exists'}\n"
+        + f"{MCQ_DECK_NAME}: {'added sample MCQ' if mcq_added else 'already exists'}\n"
+        + f"{CODE_MCQ_DECK_NAME}: {'added code MCQ' if code_mcq_added else 'already exists'}"
     )
+
+
+def _reset() -> None:
+    """Remove all Foggy test decks and their cards."""
+    col = mw.col
+    if col is None:
+        showInfo("Please open a profile first.")
+        return
+
+    removed = []
+    for deck_name in _TEST_DECK_NAMES:
+        deck = col.decks.by_name(deck_name)
+        if deck is not None:
+            col.decks.remove([deck["id"]])
+            removed.append(deck_name)
+
+    if removed:
+        showInfo("Removed decks:\n" + "\n".join(f"• {name}" for name in removed))
+    else:
+        showInfo("No Foggy test decks found.")
 
 
 def _ensure_sample_note(col, deck_name: str, notetype, sample_fields: dict[str, str], matcher) -> bool:
@@ -114,10 +160,35 @@ def _is_mcq_sample(note) -> bool:
     return note["Question"] == MCQ_SAMPLE_CARD["Question"]
 
 
+def _is_code_mcq_sample(note) -> bool:
+    return note["Question"] == CODE_MCQ_SAMPLE_CARD["Question"]
+
+
+def _open_import_window() -> None:
+    """Open the Foggy JSON importer."""
+    col = mw.col
+    if col is None:
+        showInfo("Please open a profile first.")
+        return
+
+    from . import importer
+
+    importer.show_import_window()
+
+
 gui_hooks.profile_did_open.append(_on_profile_loaded)
 
 _foggy_menu = QMenu("Foggy", mw)
 mw.form.menubar.addMenu(_foggy_menu)
-_action = QAction("Initialize", mw)
-qconnect(_action.triggered, _initialize)
-_foggy_menu.addAction(_action)
+
+_init_action = QAction("🛠️ Initialize", mw)
+qconnect(_init_action.triggered, _initialize)
+_foggy_menu.addAction(_init_action)
+
+_import_action = QAction("Import", mw)
+qconnect(_import_action.triggered, _open_import_window)
+_foggy_menu.addAction(_import_action)
+
+_reset_action = QAction("🧹 Reset", mw)
+qconnect(_reset_action.triggered, _reset)
+_foggy_menu.addAction(_reset_action)

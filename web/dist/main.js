@@ -5163,7 +5163,10 @@
     solution: '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M9 6V10.5012C9 11.0521 9 11.3276 8.93132 11.5829C8.87047 11.809 8.77037 12.0228 8.63557 12.2143C8.48344 12.4305 8.27182 12.6068 7.84859 12.9595L4.15141 16.0405C3.72818 16.3932 3.51656 16.5695 3.36443 16.7857C3.22963 16.9772 3.12953 17.191 3.06868 17.4171C3 17.6724 3 17.9479 3 18.4988V18.8C3 19.9201 3 20.4802 3.21799 20.908C3.40973 21.2843 3.71569 21.5903 4.09202 21.782C4.51984 22 5.0799 22 6.2 22H17.8C18.9201 22 19.4802 22 19.908 21.782C20.2843 21.5903 20.5903 21.2843 20.782 20.908C21 20.4802 21 19.9201 21 18.8V18.4988C21 17.9479 21 17.6724 20.9313 17.4171C20.8705 17.191 20.7704 16.9772 20.6356 16.7857C20.4834 16.5695 20.2718 16.3932 19.8486 16.0405L16.1514 12.9595C15.7282 12.6068 15.5166 12.4305 15.3644 12.2143C15.2296 12.0228 15.1295 11.809 15.0687 11.5829C15 11.3276 15 11.0521 15 10.5012V6M8.3 6H15.7C15.98 6 16.12 6 16.227 5.9455C16.3211 5.89757 16.3976 5.82108 16.4455 5.727C16.5 5.62004 16.5 5.48003 16.5 5.2V2.8C16.5 2.51997 16.5 2.37996 16.4455 2.273C16.3976 2.17892 16.3211 2.10243 16.227 2.0545C16.12 2 15.98 2 15.7 2H8.3C8.01997 2 7.87996 2 7.773 2.0545C7.67892 2.10243 7.60243 2.17892 7.5545 2.273C7.5 2.37996 7.5 2.51997 7.5 2.8V5.2C7.5 5.48003 7.5 5.62004 7.5545 5.727C7.60243 5.82108 7.67892 5.89757 7.773 5.9455C7.87996 6 8.01997 6 8.3 6ZM5.5 17H18.5C18.9647 17 19.197 17 19.3902 17.0384C20.1836 17.1962 20.8038 17.8164 20.9616 18.6098C21 18.803 21 19.0353 21 19.5C21 19.9647 21 20.197 20.9616 20.3902C20.8038 21.1836 20.1836 21.8038 19.3902 21.9616C19.197 22 18.9647 22 18.5 22H5.5C5.03534 22 4.80302 22 4.60982 21.9616C3.81644 21.8038 3.19624 21.1836 3.03843 20.3902C3 20.197 3 19.9647 3 19.5C3 19.0353 3 18.803 3.03843 18.6098C3.19624 17.8164 3.81644 17.1962 4.60982 17.0384C4.80302 17 5.03534 17 5.5 17Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>'
   };
   function initIcons() {
-    getRoot().querySelectorAll("[data-icon]").forEach(function(iconEl) {
+    injectIcons(getRoot());
+  }
+  function injectIcons(root) {
+    root.querySelectorAll("[data-icon]").forEach(function(iconEl) {
       var iconName = iconEl.getAttribute("data-icon");
       var svg = ICON_SVGS[iconName];
       if (!svg) {
@@ -5203,10 +5206,60 @@
     });
   }
 
+  // web/src/code-block.js
+  var LANG_EXT_MAP = {
+    "python": "py",
+    "javascript": "js",
+    "html": "html",
+    "css": "css",
+    "java": "java",
+    "cpp": "cpp",
+    "c": "c",
+    "csharp": "cs",
+    "ruby": "rb",
+    "php": "php",
+    "swift": "swift",
+    "go": "go",
+    "rust": "rs",
+    "sql": "sql",
+    "typescript": "ts"
+  };
+  function renderCodeBlock2(parentEl, code, language) {
+    var normalizedLang = (language || "python").toLowerCase();
+    var ext = LANG_EXT_MAP[normalizedLang] || "txt";
+    parentEl.replaceChildren();
+    var block = document.createElement("div");
+    block.className = "foggy-code-block";
+    var topbar = document.createElement("div");
+    topbar.className = "foggy-code-topbar";
+    var tab = document.createElement("div");
+    tab.className = "foggy-code-tab";
+    var icon = document.createElement("span");
+    icon.className = "foggy-panel-icon";
+    icon.setAttribute("data-icon", "code");
+    icon.setAttribute("aria-hidden", "true");
+    var fileName = document.createElement("span");
+    fileName.textContent = "solution." + ext;
+    tab.appendChild(icon);
+    tab.appendChild(fileName);
+    topbar.appendChild(tab);
+    block.appendChild(topbar);
+    var codeContainer = document.createElement("div");
+    codeContainer.className = "foggy-code-block-code";
+    block.appendChild(codeContainer);
+    parentEl.appendChild(block);
+    injectIcons(block);
+    return createCodeMirror(codeContainer, code, {
+      language: normalizedLang,
+      readOnly: true,
+      showGutters: false
+    });
+  }
+
   // web/src/mcq.js
   var FIRST_TRY_RATINGS = [
     { ease: 2, label: "Hard", cls: "hard" },
-    { ease: 4, label: "Easy", cls: "easy" }
+    { ease: 3, label: "Good", cls: "good" }
   ];
   function initMcqCard(cardData) {
     var choiceConfig = buildChoices(cardData.choices);
@@ -5216,7 +5269,9 @@
       hasValidAnswer: choiceConfig.valid,
       hadWrongAttempt: false,
       solvedOnFirstTry: false,
-      selectedId: null
+      pendingContinue: false,
+      selectedId: null,
+      lastEliminatedChoice: null
     };
     prepareLayout(cardData);
     bindPrimaryAction(state);
@@ -5228,25 +5283,45 @@
     var grid = getRoot().getElementById("foggy-grid");
     var mcqView = getRoot().getElementById("foggy-mcq-view");
     var headerRun = getRoot().getElementById("foggy-run-btn");
-    var headerCheck = getRoot().getElementById("foggy-check-btn");
+    var mcqActions = getRoot().getElementById("foggy-mcq-actions");
     var question = getRoot().getElementById("foggy-mcq-question");
     container.classList.add("foggy-container--mcq");
     setHidden(grid, true);
     setHidden(mcqView, false);
     setHidden(headerRun, true);
-    setHidden(headerCheck, true);
+    setHidden(mcqActions, true);
     question.textContent = cardData.question || cardData.title || "Untitled question";
+    if (cardData.code && cardData.code.snippet) {
+      var lineCount = cardData.code.snippet.split("\n").length;
+      if (lineCount > 10) {
+        var codePanel = getRoot().getElementById("foggy-mcq-code-panel");
+        mcqView.classList.add("has-code");
+        setHidden(codePanel, false);
+        renderCodeBlock2(codePanel, cardData.code.snippet, cardData.code.language);
+      } else {
+        mcqView.classList.add("has-code-inline");
+        var inlineCode = document.createElement("div");
+        inlineCode.id = "foggy-mcq-code-inline";
+        var panel = getRoot().getElementById("foggy-mcq-panel");
+        var choices = getRoot().getElementById("foggy-mcq-choices");
+        panel.insertBefore(inlineCode, choices);
+        renderCodeBlock2(inlineCode, cardData.code.snippet, cardData.code.language);
+      }
+    }
   }
   function bindPrimaryAction(state) {
-    var button = getRoot().getElementById("foggy-mcq-primary-btn");
+    var button = getRoot().getElementById("foggy-check-btn");
     button.addEventListener("click", function() {
       handlePrimaryAction(state);
     });
   }
   function bindRatingActions() {
-    var row = getRoot().getElementById("foggy-mcq-rating-row");
-    row.replaceChildren();
-    FIRST_TRY_RATINGS.forEach(function(rating) {
+    var bar = getRoot().getElementById("foggy-bottom-bar");
+    var row = document.createElement("div");
+    row.id = "foggy-mcq-rating-row";
+    row.className = "foggy-rating-row is-hidden";
+    var reversed = FIRST_TRY_RATINGS.slice().reverse();
+    reversed.forEach(function(rating) {
       var button = document.createElement("button");
       button.type = "button";
       button.className = "foggy-rating-btn foggy-rating-btn--" + rating.cls;
@@ -5256,8 +5331,18 @@
       });
       row.appendChild(button);
     });
+    var checkBtn = getRoot().getElementById("foggy-check-btn");
+    bar.insertBefore(row, checkBtn);
   }
   function handlePrimaryAction(state) {
+    if (state.pendingContinue) {
+      answerCard(state.hadWrongAttempt ? 1 : 3);
+      return;
+    }
+    if (state.solvedOnFirstTry) {
+      answerCard(3);
+      return;
+    }
     if (!state.hasValidAnswer || !state.selectedId) {
       return;
     }
@@ -5267,7 +5352,8 @@
     }
     if (selectedChoice.isCorrect) {
       if (state.hadWrongAttempt) {
-        answerCard(1);
+        state.pendingContinue = true;
+        renderMcq(state);
         return;
       }
       state.solvedOnFirstTry = true;
@@ -5275,12 +5361,14 @@
       return;
     }
     selectedChoice.isEliminated = true;
+    state.lastEliminatedChoice = selectedChoice;
     state.selectedId = null;
     state.hadWrongAttempt = true;
     renderMcq(state);
   }
   function renderMcq(state) {
     renderChoices(state);
+    renderFeedback(state);
     renderActions(state);
   }
   function renderChoices(state) {
@@ -5289,7 +5377,7 @@
     state.choices.forEach(function(choice, index2) {
       var button = document.createElement("button");
       var isSelected = state.selectedId === choice.id;
-      var isSolvedCorrect = state.solvedOnFirstTry && choice.isCorrect;
+      var isSolvedCorrect = (state.solvedOnFirstTry || state.pendingContinue) && choice.isCorrect;
       button.type = "button";
       button.className = "foggy-mcq-choice";
       button.setAttribute("role", "option");
@@ -5303,15 +5391,15 @@
       if (isSolvedCorrect) {
         button.classList.add("is-correct");
       }
-      button.disabled = choice.isEliminated || state.solvedOnFirstTry || !state.hasValidAnswer;
+      button.disabled = choice.isEliminated || state.solvedOnFirstTry || state.pendingContinue || !state.hasValidAnswer;
       var text3 = document.createElement("span");
       text3.className = "foggy-mcq-choice-text";
       text3.textContent = choice.text;
       var indexBadge = document.createElement("span");
       indexBadge.className = "foggy-mcq-choice-index";
-      indexBadge.textContent = String.fromCharCode(65 + index2);
-      button.appendChild(indexBadge);
+      indexBadge.textContent = String(index2 + 1);
       button.appendChild(text3);
+      button.appendChild(indexBadge);
       button.addEventListener("click", function() {
         state.selectedId = choice.id;
         renderMcq(state);
@@ -5319,18 +5407,51 @@
       container.appendChild(button);
     });
   }
-  function renderActions(state) {
-    var primaryButton = getRoot().getElementById("foggy-mcq-primary-btn");
-    var ratingRow = getRoot().getElementById("foggy-mcq-rating-row");
-    if (state.solvedOnFirstTry) {
-      setHidden(primaryButton, true);
-      setHidden(ratingRow, false);
+  function renderFeedback(state) {
+    var container = getRoot().getElementById("foggy-mcq-feedback");
+    var showCorrect = state.solvedOnFirstTry || state.pendingContinue && !state.solvedOnFirstTry;
+    var showWrong = !!state.lastEliminatedChoice;
+    if (!showCorrect && !showWrong) {
+      setHidden(container, true);
       return;
     }
-    setHidden(primaryButton, false);
+    container.replaceChildren();
+    var feedbackChoice = showCorrect ? state.choices.find(function(c) {
+      return c.isCorrect;
+    }) : state.lastEliminatedChoice;
+    var notes = feedbackChoice ? feedbackChoice.notes : "";
+    container.className = showCorrect ? "foggy-mcq-feedback is-correct" : "foggy-mcq-feedback is-wrong";
+    var label = document.createElement("span");
+    label.className = "foggy-mcq-feedback-label";
+    label.textContent = showCorrect ? "\u2713 Correct" : "\u2717 Wrong";
+    container.appendChild(label);
+    if (notes) {
+      var notesEl = document.createElement("p");
+      notesEl.className = "foggy-mcq-feedback-notes";
+      notesEl.textContent = notes;
+      container.appendChild(notesEl);
+    }
+    setHidden(container, false);
+  }
+  function renderActions(state) {
+    var checkBtn = getRoot().getElementById("foggy-check-btn");
+    var ratingRow = getRoot().getElementById("foggy-mcq-rating-row");
+    if (state.pendingContinue) {
+      setHidden(ratingRow, true);
+      checkBtn.innerHTML = "Continue";
+      checkBtn.disabled = false;
+      return;
+    }
+    if (state.solvedOnFirstTry) {
+      setHidden(ratingRow, false);
+      checkBtn.innerHTML = "Continue";
+      checkBtn.disabled = false;
+      return;
+    }
     setHidden(ratingRow, true);
-    primaryButton.textContent = state.hadWrongAttempt ? "Continue" : "Check";
-    primaryButton.disabled = !state.hasValidAnswer || !state.selectedId;
+    var label = "Check";
+    checkBtn.innerHTML = label;
+    checkBtn.disabled = !state.hasValidAnswer || !state.selectedId;
   }
   function buildChoices(rawChoices) {
     var parsed = parseJsonChoices(rawChoices);
@@ -5358,7 +5479,8 @@
           id: "mcq-choice-" + index2,
           text: String(item.text || ""),
           isCorrect: item.correct === true,
-          isEliminated: false
+          isEliminated: false,
+          notes: item.notes ? String(item.notes) : ""
         };
       }),
       valid: true
@@ -5722,12 +5844,14 @@
     var tabs = getRoot().querySelectorAll("[data-left-tab]");
     var problemPanel = getRoot().getElementById("foggy-problem");
     var solutionPanel = getRoot().getElementById("foggy-solution");
-    var solutionView = null;
+    var solutionRendered = false;
     tabs.forEach(function(tab) {
       tab.addEventListener("click", function() {
         var target = tab.getAttribute("data-left-tab");
-        if (target === "solution" && cardData.solution && !solutionView) {
-          solutionView = renderSolution(cardData.solution, cardData.language);
+        if (target === "solution" && cardData.solution && !solutionRendered) {
+          var container = getRoot().getElementById("foggy-solution-content");
+          renderCodeBlock2(container, cardData.solution, cardData.language);
+          solutionRendered = true;
         }
         if (target === "solution" && typeof onSolutionAccess === "function") {
           onSolutionAccess();
@@ -5738,15 +5862,6 @@
         setHidden(problemPanel, target !== "description");
         setHidden(solutionPanel, target !== "solution");
       });
-    });
-  }
-  function renderSolution(code, lang) {
-    var container = getRoot().getElementById("foggy-solution-code");
-    container.replaceChildren();
-    return createCodeMirror(container, code, {
-      language: lang,
-      readOnly: true,
-      showGutters: false
     });
   }
 

@@ -51,6 +51,7 @@ MCQ_SPEC = NoteTypeSpec(
         "Question",
         "Difficulty",
         "Choices",
+        "Code",
     ),
     front_template="""\
 <div id="foggy-mcq-front">
@@ -67,9 +68,9 @@ MCQ_SPEC = NoteTypeSpec(
 NOTE_TYPE_SPECS = (CODING_SPEC, MCQ_SPEC)
 
 
-def ensure_note_types() -> None:
+def ensure_note_types(col=None) -> None:
     """Create or migrate all Foggy note types."""
-    col = mw.col
+    col = col or mw.col
     if col is None:
         return
 
@@ -77,9 +78,9 @@ def ensure_note_types() -> None:
         _ensure_note_type(col, spec)
 
 
-def ensure_note_type() -> None:
+def ensure_note_type(col=None) -> None:
     """Backward-compatible wrapper for existing callers."""
-    ensure_note_types()
+    ensure_note_types(col)
 
 
 def _ensure_note_type(col, spec: NoteTypeSpec) -> None:

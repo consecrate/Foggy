@@ -9,13 +9,21 @@ _toolbar_widget_state: list[tuple[QWidget, bool, int, int, bool | None]] = []
 _bottom_bar_widget_state: list[tuple[QWidget, bool, int, int, bool | None]] = []
 
 
-def hide_reviewer_chrome() -> None:
+def hide_reviewer_chrome(*, hide_bottom_bar: bool = True) -> None:
     _hide_toolbar()
-    _hide_bottom_bar()
+    if hide_bottom_bar:
+        _hide_bottom_bar()
+    else:
+        _show_bottom_bar()
 
 
-def restore_reviewer_chrome() -> None:
+def restore_reviewer_chrome(*, restore_bottom_bar: bool = True) -> None:
     _show_toolbar()
+    if restore_bottom_bar:
+        _show_bottom_bar()
+
+
+def show_reviewer_bottom_bar() -> None:
     _show_bottom_bar()
 
 

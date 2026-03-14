@@ -1,4 +1,4 @@
-import { createCodeMirror } from "./editor.js";
+import { renderCodeBlock } from "./code-block.js";
 import { getRoot } from "./root.js";
 import { setHidden } from "./ui.js";
 
@@ -6,14 +6,16 @@ export function initLeftTabs(cardData, onSolutionAccess) {
   var tabs = getRoot().querySelectorAll("[data-left-tab]");
   var problemPanel = getRoot().getElementById("foggy-problem");
   var solutionPanel = getRoot().getElementById("foggy-solution");
-  var solutionView = null;
+  var solutionRendered = false;
 
   tabs.forEach(function (tab) {
     tab.addEventListener("click", function () {
       var target = tab.getAttribute("data-left-tab");
 
-      if (target === "solution" && cardData.solution && !solutionView) {
-        solutionView = renderSolution(cardData.solution, cardData.language);
+      if (target === "solution" && cardData.solution && !solutionRendered) {
+        var container = getRoot().getElementById("foggy-solution-content");
+        renderCodeBlock(container, cardData.solution, cardData.language);
+        solutionRendered = true;
       }
 
       if (target === "solution" && typeof onSolutionAccess === "function") {
@@ -27,15 +29,5 @@ export function initLeftTabs(cardData, onSolutionAccess) {
       setHidden(problemPanel, target !== "description");
       setHidden(solutionPanel, target !== "solution");
     });
-  });
-}
-
-function renderSolution(code, lang) {
-  var container = getRoot().getElementById("foggy-solution-code");
-  container.replaceChildren();
-  return createCodeMirror(container, code, {
-    language: lang,
-    readOnly: true,
-    showGutters: false,
   });
 }

@@ -25,6 +25,7 @@
   /* ── Mint Green — matching the mascot ── */
   --foggy-accent: oklch(0.78 0.14 145);
   --foggy-accent-hover: oklch(0.82 0.14 145);
+  --foggy-radius-code-block: 12px;
 
   /* ── Semantic colours ── */
   --foggy-case-pill-bg: oklch(0.30 0.045 145);
