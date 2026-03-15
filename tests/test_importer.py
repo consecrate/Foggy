@@ -6,6 +6,7 @@ import unittest
 from importer import (
     CODING_KIND,
     MCQ_KIND,
+    PROMPT_TEMPLATES,
     ValidatedImportItem,
     build_duplicate_key,
     normalize_import_payload,
@@ -17,6 +18,24 @@ from importer import (
 
 
 class ImporterTests(unittest.TestCase):
+    def test_coding_prompt_mentions_replacing_placeholder_values(self) -> None:
+        prompt = PROMPT_TEMPLATES["Coding"]
+
+        self.assertIn("treat the example values as placeholders only", prompt)
+        self.assertIn("If the source implies a different language", prompt)
+
+    def test_coding_prompt_mentions_markdown_readability(self) -> None:
+        prompt = PROMPT_TEMPLATES["Coding"]
+
+        self.assertIn('Write "description" as readable Markdown', prompt)
+        self.assertIn("Avoid returning one long unformatted block of text.", prompt)
+
+    def test_mixed_prompt_mentions_replacing_placeholder_values(self) -> None:
+        prompt = PROMPT_TEMPLATES["Mixed"]
+
+        self.assertIn("Use the schemas below as structure only.", prompt)
+        self.assertIn("Do not copy placeholder values", prompt)
+
     def test_normalize_import_payload_wraps_single_object(self) -> None:
         payload = {"kind": CODING_KIND, "title": "Two Sum"}
 

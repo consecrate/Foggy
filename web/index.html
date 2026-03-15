@@ -3,92 +3,139 @@
     <button id="foggy-home-btn" type="button" aria-label="Return to home" title="Return to Decks">
       <span class="foggy-panel-icon foggy-home-icon" data-icon="close" aria-hidden="true"></span>
     </button>
+    <div id="foggy-review-progress" class="is-hidden" aria-hidden="true">
+      <div id="foggy-review-progress-track"></div>
+    </div>
+    <div class="foggy-header-spacer" aria-hidden="true"></div>
     <span id="foggy-header-state" class="is-hidden"></span>
     <span id="foggy-header-title" class="is-hidden"></span>
     <div id="foggy-difficulty-badge" class="is-hidden"></div>
     <button id="foggy-run-btn" type="button" class="is-hidden">Run</button>
-    <div class="foggy-header-spacer"></div>
   </div>
 
-  <div id="foggy-grid">
-    <div id="foggy-left-wrapper">
-      <div class="foggy-panel-header">
-        <div class="foggy-panel-tab active" data-left-tab="description">
-          <span class="foggy-panel-icon" data-icon="description" aria-hidden="true"></span>
-          <span class="foggy-panel-title">Description</span>
-        </div>
-        <div class="foggy-panel-tab" data-left-tab="solution">
-          <span class="foggy-panel-icon" data-icon="solution" aria-hidden="true"></span>
-          <span class="foggy-panel-title">Solution</span>
-        </div>
-      </div>
-      <div id="foggy-problem">
-        <h2 id="foggy-title"></h2>
-        <div id="foggy-description"></div>
-      </div>
-      <div id="foggy-solution" class="is-hidden">
-        <div id="foggy-solution-content"></div>
-      </div>
-    </div>
-
-    <div class="gutter-col" id="foggy-gutter-col"></div>
-
-    <div id="foggy-right">
-      <div id="foggy-top-wrapper">
+  <div id="foggy-main">
+    <div id="foggy-grid">
+      <div id="foggy-left-wrapper">
         <div class="foggy-panel-header">
-          <div class="foggy-panel-tab active">
-            <span class="foggy-panel-icon" data-icon="code" aria-hidden="true"></span>
-            <span class="foggy-panel-title">Code</span>
+          <div class="foggy-panel-tab active" data-left-tab="description">
+            <span class="foggy-panel-icon" data-icon="description" aria-hidden="true"></span>
+            <span class="foggy-panel-title">Description</span>
+          </div>
+          <div class="foggy-panel-tab" data-left-tab="solution">
+            <span class="foggy-panel-icon" data-icon="solution" aria-hidden="true"></span>
+            <span class="foggy-panel-title">Solution</span>
           </div>
         </div>
-        <div id="foggy-editor"></div>
+        <div id="foggy-problem">
+          <h2 id="foggy-title"></h2>
+          <div id="foggy-description"></div>
+        </div>
+        <div id="foggy-solution" class="is-hidden">
+          <div id="foggy-solution-content"></div>
+        </div>
       </div>
 
-      <div class="gutter-row" id="foggy-gutter-row"></div>
+      <div class="gutter-col" id="foggy-gutter-col"></div>
 
-      <div id="foggy-bottom-panel">
-        <div class="foggy-panel-header">
-          <div class="foggy-panel-tab active" data-tab="testcase">
-            <span class="foggy-panel-icon" data-icon="testcase" aria-hidden="true"></span>
-            <span class="foggy-panel-title">Testcase</span>
+      <div id="foggy-right">
+        <div id="foggy-top-wrapper">
+          <div class="foggy-panel-header">
+            <div class="foggy-panel-tab active">
+              <span class="foggy-panel-icon" data-icon="code" aria-hidden="true"></span>
+              <span class="foggy-panel-title">Code</span>
+            </div>
           </div>
-          <div class="foggy-tab-divider"></div>
-          <div class="foggy-panel-tab" data-tab="result">
-            <span class="foggy-panel-icon" data-icon="test-result" aria-hidden="true"></span>
-            <span class="foggy-panel-title">Test Result</span>
-          </div>
+          <div id="foggy-editor"></div>
         </div>
-        <div class="foggy-tab-content" id="foggy-tab-testcase">
-          <div id="foggy-testcase-content">
-            <span class="foggy-hint">Loading test cases…</span>
+
+        <div class="gutter-row" id="foggy-gutter-row"></div>
+
+        <div id="foggy-bottom-panel">
+          <div class="foggy-panel-header">
+            <div class="foggy-panel-tab active" data-tab="testcase">
+              <span class="foggy-panel-icon" data-icon="testcase" aria-hidden="true"></span>
+              <span class="foggy-panel-title">Testcase</span>
+            </div>
+            <div class="foggy-tab-divider"></div>
+            <div class="foggy-panel-tab" data-tab="result">
+              <span class="foggy-panel-icon" data-icon="test-result" aria-hidden="true"></span>
+              <span class="foggy-panel-title">Test Result</span>
+            </div>
           </div>
-        </div>
-        <div class="foggy-tab-content is-hidden" id="foggy-tab-result">
-          <div id="foggy-results-content">
-            <span class="foggy-hint">Press Run to execute your code</span>
+          <div class="foggy-tab-content" id="foggy-tab-testcase">
+            <div id="foggy-testcase-content">
+              <span class="foggy-hint">Loading test cases…</span>
+            </div>
+          </div>
+          <div class="foggy-tab-content is-hidden" id="foggy-tab-result">
+            <div id="foggy-results-content">
+              <span class="foggy-hint">Press Run to execute your code</span>
+            </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
 
-  <div id="foggy-mcq-view" class="is-hidden">
-    <div id="foggy-mcq-shell">
-      <div id="foggy-mcq-panel">
-        <h1 id="foggy-mcq-question"></h1>
-        <div id="foggy-mcq-choices" role="listbox" aria-label="Answer choices"></div>
-        <div id="foggy-mcq-feedback" class="is-hidden"></div>
-        <div id="foggy-mcq-actions">
-          <button id="foggy-mcq-primary-btn" type="button" disabled>Check</button>
+    <div id="foggy-mcq-view" class="is-hidden">
+      <div id="foggy-mcq-shell">
+        <div id="foggy-mcq-panel">
+          <h1 id="foggy-mcq-question"></h1>
+          <div id="foggy-mcq-choices" role="listbox" aria-label="Answer choices"></div>
+          <div id="foggy-mcq-feedback" class="is-hidden"></div>
+          <div id="foggy-mcq-actions">
+            <button id="foggy-mcq-primary-btn" type="button" disabled>Check</button>
+          </div>
+        </div>
+      </div>
+      <div id="foggy-mcq-code-panel" class="is-hidden"></div>
+    </div>
+
+    <div id="foggy-translate-view" class="is-hidden">
+      <div id="foggy-translate-shell">
+        <div id="foggy-translate-card" class="foggy-translate-layout">
+          <h1 id="foggy-translate-prompt-title"></h1>
+          <div id="foggy-translate-speech-zone">
+            <div class="foggy-translate-speech-bubble">
+              <p id="foggy-translate-prompt-text"></p>
+              <button id="foggy-translate-audio-btn" type="button" class="is-hidden">Play audio</button>
+              <div id="foggy-translate-english-reveal" class="is-hidden"></div>
+              <div id="foggy-translate-context" class="is-hidden"></div>
+            </div>
+          </div>
+          <div id="foggy-translate-standard-input">
+            <textarea id="foggy-translate-input" rows="3"></textarea>
+          </div>
+          <div id="foggy-translate-fillblank" class="is-hidden"></div>
+          <div id="foggy-translate-notes" class="is-hidden"></div>
         </div>
       </div>
     </div>
-    <div id="foggy-mcq-code-panel" class="is-hidden"></div>
-  </div>
 
-  <div id="foggy-bottom-bar">
-    <button id="foggy-check-btn" type="button">
-      Run <span class="foggy-btn-shortcut">⌘+↵</span>
-    </button>
+    <div id="foggy-bottom-bar">
+      <button id="foggy-check-btn" type="button">
+        Run <span class="foggy-btn-shortcut">⌘+↵</span>
+      </button>
+    </div>
+
+    <div id="foggy-review-reward" class="is-hidden">
+      <div class="foggy-review-reward-panel">
+        <h1 class="foggy-review-reward-title">Keep on goin'!</h1>
+        <p class="foggy-review-reward-copy">Ten cards down. Take the cat, then jump back in.</p>
+        <div class="foggy-review-reward-image-wrap">
+          <img
+            id="foggy-review-reward-image"
+            class="foggy-review-reward-image"
+            src=""
+            alt="Random cat reward from CATAAS"
+            decoding="async"
+          >
+        </div>
+        <div class="foggy-review-reward-actions">
+          <button id="foggy-review-reward-continue" class="foggy-review-reward-button" type="button">
+            Continue
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 </div>

@@ -4,7 +4,14 @@ from dataclasses import dataclass
 import os
 
 ADDON_DIR = os.path.dirname(os.path.dirname(__file__))
+REVIEWER_DIR = os.path.dirname(__file__)
 WEB_DIR = os.path.join(ADDON_DIR, "web")
+MEDIA_DIR = os.path.join(REVIEWER_DIR, "media")
+
+_FEEDBACK_SOUND_FILENAMES = {
+    "correct": "correct.mp3",
+    "incorrect": "incorrect.mp3",
+}
 
 
 @dataclass(frozen=True)
@@ -36,6 +43,15 @@ def get_web_assets() -> WebAssets:
         )
 
     return _cached_assets
+
+
+def get_feedback_sound_path(result: str) -> str | None:
+    filename = _FEEDBACK_SOUND_FILENAMES.get(str(result or "").strip().lower())
+    if not filename:
+        return None
+
+    path = os.path.join(MEDIA_DIR, filename)
+    return path if os.path.exists(path) else None
 
 
 def _read_text(path: str) -> str:

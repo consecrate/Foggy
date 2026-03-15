@@ -9,11 +9,26 @@
   function navigateHome() {
     pycmd("foggy:home");
   }
+  function continueWrappedReward() {
+    pycmd("foggy:reward-continue");
+  }
   function sendRunRequest(request) {
     pycmd("foggy:run:" + JSON.stringify(request));
   }
   function answerCard(ease) {
     pycmd("foggy:answer:" + ease);
+  }
+  function playFeedbackSound(kind) {
+    if (kind !== "correct" && kind !== "incorrect") {
+      return;
+    }
+    pycmd("foggy:play-feedback:" + kind);
+  }
+  function playCardAudio(audioMarkup) {
+    if (!audioMarkup) {
+      return;
+    }
+    pycmd("foggy:play-audio:" + audioMarkup);
   }
   function registerResultHandler(handler) {
     window.foggyReceiveResults = handler;
@@ -5037,12 +5052,24 @@
     });
   }
   function getLanguageExtension(codeMirror, language) {
-    var normalizedLanguage = (language || "python").toLowerCase();
+    var normalizedLanguage = normalizeEditorLanguage(language);
     switch (normalizedLanguage) {
+      case "cpp":
+        return codeMirror.cpp();
       case "python":
       default:
         return codeMirror.python();
     }
+  }
+  function normalizeEditorLanguage(language) {
+    var normalizedLanguage = String(language || "python").toLowerCase().trim();
+    if (normalizedLanguage === "c++" || normalizedLanguage === "cxx" || normalizedLanguage === "cc") {
+      return "cpp";
+    }
+    if (normalizedLanguage === "py") {
+      return "python";
+    }
+    return normalizedLanguage;
   }
 
   // web/src/format.js
@@ -5209,6 +5236,7 @@
   // web/src/code-block.js
   var LANG_EXT_MAP = {
     "python": "py",
+    "c++": "cpp",
     "javascript": "js",
     "html": "html",
     "css": "css",
@@ -5225,7 +5253,7 @@
     "typescript": "ts"
   };
   function renderCodeBlock2(parentEl, code, language) {
-    var normalizedLang = (language || "python").toLowerCase();
+    var normalizedLang = normalizeCodeLanguage(language);
     var ext = LANG_EXT_MAP[normalizedLang] || "txt";
     parentEl.replaceChildren();
     var block = document.createElement("div");
@@ -5255,12 +5283,68 @@
       showGutters: false
     });
   }
+  function normalizeCodeLanguage(language) {
+    var normalized = String(language || "python").toLowerCase().trim();
+    if (normalized === "c++" || normalized === "cxx" || normalized === "cc") {
+      return "cpp";
+    }
+    if (normalized === "py") {
+      return "python";
+    }
+    return normalized;
+  }
 
-  // web/src/mcq.js
+  // web/src/rating-row.js
   var FIRST_TRY_RATINGS = [
     { ease: 2, label: "Hard", cls: "hard" },
     { ease: 3, label: "Good", cls: "good" }
   ];
+  var REVIEW_RATINGS = [
+    { ease: 1, label: "Again", cls: "again" },
+    { ease: 2, label: "Hard", cls: "hard" },
+    { ease: 3, label: "Good", cls: "good" },
+    { ease: 4, label: "Easy", cls: "easy" }
+  ];
+  function ensureRatingRow(options) {
+    var rowId = options.id;
+    var ratings = options.ratings;
+    var hidden = !!options.hidden;
+    var existing = getRoot().getElementById(rowId);
+    if (existing) {
+      existing.classList.toggle("is-hidden", hidden);
+      return existing;
+    }
+    var row = document.createElement("div");
+    row.id = rowId;
+    row.className = "foggy-rating-row";
+    row.classList.toggle("is-hidden", hidden);
+    ratings.slice().reverse().forEach(function(rating) {
+      var button = document.createElement("button");
+      button.type = "button";
+      button.className = "foggy-rating-btn foggy-rating-btn--" + rating.cls;
+      button.textContent = rating.label;
+      button.addEventListener("click", function() {
+        answerCard(rating.ease);
+      });
+      row.appendChild(button);
+    });
+    var bar = getRoot().getElementById("foggy-bottom-bar");
+    var anchor = getRoot().getElementById(options.anchorId || "foggy-check-btn");
+    if (bar && anchor) {
+      bar.insertBefore(row, anchor);
+    } else if (bar) {
+      bar.appendChild(row);
+    }
+    return row;
+  }
+  function removeRatingRow(rowId) {
+    var existing = getRoot().getElementById(rowId);
+    if (existing) {
+      existing.remove();
+    }
+  }
+
+  // web/src/mcq.js
   function initMcqCard(cardData) {
     var choiceConfig = buildChoices(cardData.choices);
     var state = {
@@ -5316,23 +5400,11 @@
     });
   }
   function bindRatingActions() {
-    var bar = getRoot().getElementById("foggy-bottom-bar");
-    var row = document.createElement("div");
-    row.id = "foggy-mcq-rating-row";
-    row.className = "foggy-rating-row is-hidden";
-    var reversed = FIRST_TRY_RATINGS.slice().reverse();
-    reversed.forEach(function(rating) {
-      var button = document.createElement("button");
-      button.type = "button";
-      button.className = "foggy-rating-btn foggy-rating-btn--" + rating.cls;
-      button.textContent = rating.label;
-      button.addEventListener("click", function() {
-        answerCard(rating.ease);
-      });
-      row.appendChild(button);
+    ensureRatingRow({
+      id: "foggy-mcq-rating-row",
+      ratings: FIRST_TRY_RATINGS,
+      hidden: true
     });
-    var checkBtn = getRoot().getElementById("foggy-check-btn");
-    bar.insertBefore(row, checkBtn);
   }
   function handlePrimaryAction(state) {
     if (state.pendingContinue) {
@@ -5351,6 +5423,7 @@
       return;
     }
     if (selectedChoice.isCorrect) {
+      playFeedbackSound("correct");
       if (state.hadWrongAttempt) {
         state.pendingContinue = true;
         renderMcq(state);
@@ -5360,6 +5433,7 @@
       renderMcq(state);
       return;
     }
+    playFeedbackSound("incorrect");
     selectedChoice.isEliminated = true;
     state.lastEliminatedChoice = selectedChoice;
     state.selectedId = null;
@@ -5601,12 +5675,6 @@
   }
 
   // web/src/results.js
-  var RATINGS = [
-    { ease: 1, label: "Again", cls: "again" },
-    { ease: 2, label: "Hard", cls: "hard" },
-    { ease: 3, label: "Good", cls: "good" },
-    { ease: 4, label: "Easy", cls: "easy" }
-  ];
   function renderResults(result, cardData) {
     var container = getRoot().getElementById("foggy-results-content");
     var shell = document.createElement("div");
@@ -5685,33 +5753,15 @@
     container.appendChild(shell);
   }
   function setRatingButtonsVisible(visible) {
-    var existing = getRoot().getElementById("foggy-rating-row");
     if (!visible) {
-      if (existing) {
-        existing.remove();
-      }
+      removeRatingRow("foggy-rating-row");
       return;
     }
-    if (existing) {
-      return;
-    }
-    var row = document.createElement("div");
-    row.id = "foggy-rating-row";
-    row.className = "foggy-rating-row";
-    var reversed = RATINGS.slice().reverse();
-    reversed.forEach(function(rating) {
-      var btn = document.createElement("button");
-      btn.type = "button";
-      btn.className = "foggy-rating-btn foggy-rating-btn--" + rating.cls;
-      btn.textContent = rating.label;
-      btn.addEventListener("click", function() {
-        answerCard(rating.ease);
-      });
-      row.appendChild(btn);
+    ensureRatingRow({
+      id: "foggy-rating-row",
+      ratings: REVIEW_RATINGS,
+      hidden: false
     });
-    var bar = getRoot().getElementById("foggy-bottom-bar");
-    var runBtn = getRoot().getElementById("foggy-check-btn");
-    bar.insertBefore(row, runBtn);
   }
   function buildResultHeader(result, focusIndex) {
     var header = document.createElement("section");
@@ -5839,6 +5889,884 @@
     setHidden(getRoot().getElementById("foggy-tab-result"), target !== "result");
   }
 
+  // node_modules/diff/libesm/diff/base.js
+  var Diff = class {
+    diff(oldStr, newStr, options = {}) {
+      let callback;
+      if (typeof options === "function") {
+        callback = options;
+        options = {};
+      } else if ("callback" in options) {
+        callback = options.callback;
+      }
+      const oldString = this.castInput(oldStr, options);
+      const newString = this.castInput(newStr, options);
+      const oldTokens = this.removeEmpty(this.tokenize(oldString, options));
+      const newTokens = this.removeEmpty(this.tokenize(newString, options));
+      return this.diffWithOptionsObj(oldTokens, newTokens, options, callback);
+    }
+    diffWithOptionsObj(oldTokens, newTokens, options, callback) {
+      var _a;
+      const done = (value) => {
+        value = this.postProcess(value, options);
+        if (callback) {
+          setTimeout(function() {
+            callback(value);
+          }, 0);
+          return void 0;
+        } else {
+          return value;
+        }
+      };
+      const newLen = newTokens.length, oldLen = oldTokens.length;
+      let editLength = 1;
+      let maxEditLength = newLen + oldLen;
+      if (options.maxEditLength != null) {
+        maxEditLength = Math.min(maxEditLength, options.maxEditLength);
+      }
+      const maxExecutionTime = (_a = options.timeout) !== null && _a !== void 0 ? _a : Infinity;
+      const abortAfterTimestamp = Date.now() + maxExecutionTime;
+      const bestPath = [{ oldPos: -1, lastComponent: void 0 }];
+      let newPos = this.extractCommon(bestPath[0], newTokens, oldTokens, 0, options);
+      if (bestPath[0].oldPos + 1 >= oldLen && newPos + 1 >= newLen) {
+        return done(this.buildValues(bestPath[0].lastComponent, newTokens, oldTokens));
+      }
+      let minDiagonalToConsider = -Infinity, maxDiagonalToConsider = Infinity;
+      const execEditLength = () => {
+        for (let diagonalPath = Math.max(minDiagonalToConsider, -editLength); diagonalPath <= Math.min(maxDiagonalToConsider, editLength); diagonalPath += 2) {
+          let basePath;
+          const removePath = bestPath[diagonalPath - 1], addPath = bestPath[diagonalPath + 1];
+          if (removePath) {
+            bestPath[diagonalPath - 1] = void 0;
+          }
+          let canAdd = false;
+          if (addPath) {
+            const addPathNewPos = addPath.oldPos - diagonalPath;
+            canAdd = addPath && 0 <= addPathNewPos && addPathNewPos < newLen;
+          }
+          const canRemove = removePath && removePath.oldPos + 1 < oldLen;
+          if (!canAdd && !canRemove) {
+            bestPath[diagonalPath] = void 0;
+            continue;
+          }
+          if (!canRemove || canAdd && removePath.oldPos < addPath.oldPos) {
+            basePath = this.addToPath(addPath, true, false, 0, options);
+          } else {
+            basePath = this.addToPath(removePath, false, true, 1, options);
+          }
+          newPos = this.extractCommon(basePath, newTokens, oldTokens, diagonalPath, options);
+          if (basePath.oldPos + 1 >= oldLen && newPos + 1 >= newLen) {
+            return done(this.buildValues(basePath.lastComponent, newTokens, oldTokens)) || true;
+          } else {
+            bestPath[diagonalPath] = basePath;
+            if (basePath.oldPos + 1 >= oldLen) {
+              maxDiagonalToConsider = Math.min(maxDiagonalToConsider, diagonalPath - 1);
+            }
+            if (newPos + 1 >= newLen) {
+              minDiagonalToConsider = Math.max(minDiagonalToConsider, diagonalPath + 1);
+            }
+          }
+        }
+        editLength++;
+      };
+      if (callback) {
+        (function exec() {
+          setTimeout(function() {
+            if (editLength > maxEditLength || Date.now() > abortAfterTimestamp) {
+              return callback(void 0);
+            }
+            if (!execEditLength()) {
+              exec();
+            }
+          }, 0);
+        })();
+      } else {
+        while (editLength <= maxEditLength && Date.now() <= abortAfterTimestamp) {
+          const ret = execEditLength();
+          if (ret) {
+            return ret;
+          }
+        }
+      }
+    }
+    addToPath(path, added, removed, oldPosInc, options) {
+      const last = path.lastComponent;
+      if (last && !options.oneChangePerToken && last.added === added && last.removed === removed) {
+        return {
+          oldPos: path.oldPos + oldPosInc,
+          lastComponent: { count: last.count + 1, added, removed, previousComponent: last.previousComponent }
+        };
+      } else {
+        return {
+          oldPos: path.oldPos + oldPosInc,
+          lastComponent: { count: 1, added, removed, previousComponent: last }
+        };
+      }
+    }
+    extractCommon(basePath, newTokens, oldTokens, diagonalPath, options) {
+      const newLen = newTokens.length, oldLen = oldTokens.length;
+      let oldPos = basePath.oldPos, newPos = oldPos - diagonalPath, commonCount = 0;
+      while (newPos + 1 < newLen && oldPos + 1 < oldLen && this.equals(oldTokens[oldPos + 1], newTokens[newPos + 1], options)) {
+        newPos++;
+        oldPos++;
+        commonCount++;
+        if (options.oneChangePerToken) {
+          basePath.lastComponent = { count: 1, previousComponent: basePath.lastComponent, added: false, removed: false };
+        }
+      }
+      if (commonCount && !options.oneChangePerToken) {
+        basePath.lastComponent = { count: commonCount, previousComponent: basePath.lastComponent, added: false, removed: false };
+      }
+      basePath.oldPos = oldPos;
+      return newPos;
+    }
+    equals(left, right, options) {
+      if (options.comparator) {
+        return options.comparator(left, right);
+      } else {
+        return left === right || !!options.ignoreCase && left.toLowerCase() === right.toLowerCase();
+      }
+    }
+    removeEmpty(array) {
+      const ret = [];
+      for (let i = 0; i < array.length; i++) {
+        if (array[i]) {
+          ret.push(array[i]);
+        }
+      }
+      return ret;
+    }
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    castInput(value, options) {
+      return value;
+    }
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    tokenize(value, options) {
+      return Array.from(value);
+    }
+    join(chars) {
+      return chars.join("");
+    }
+    postProcess(changeObjects, options) {
+      return changeObjects;
+    }
+    get useLongestToken() {
+      return false;
+    }
+    buildValues(lastComponent, newTokens, oldTokens) {
+      const components = [];
+      let nextComponent;
+      while (lastComponent) {
+        components.push(lastComponent);
+        nextComponent = lastComponent.previousComponent;
+        delete lastComponent.previousComponent;
+        lastComponent = nextComponent;
+      }
+      components.reverse();
+      const componentLen = components.length;
+      let componentPos = 0, newPos = 0, oldPos = 0;
+      for (; componentPos < componentLen; componentPos++) {
+        const component = components[componentPos];
+        if (!component.removed) {
+          if (!component.added && this.useLongestToken) {
+            let value = newTokens.slice(newPos, newPos + component.count);
+            value = value.map(function(value2, i) {
+              const oldValue = oldTokens[oldPos + i];
+              return oldValue.length > value2.length ? oldValue : value2;
+            });
+            component.value = this.join(value);
+          } else {
+            component.value = this.join(newTokens.slice(newPos, newPos + component.count));
+          }
+          newPos += component.count;
+          if (!component.added) {
+            oldPos += component.count;
+          }
+        } else {
+          component.value = this.join(oldTokens.slice(oldPos, oldPos + component.count));
+          oldPos += component.count;
+        }
+      }
+      return components;
+    }
+  };
+
+  // node_modules/diff/libesm/util/string.js
+  function longestCommonPrefix(str1, str2) {
+    let i;
+    for (i = 0; i < str1.length && i < str2.length; i++) {
+      if (str1[i] != str2[i]) {
+        return str1.slice(0, i);
+      }
+    }
+    return str1.slice(0, i);
+  }
+  function longestCommonSuffix(str1, str2) {
+    let i;
+    if (!str1 || !str2 || str1[str1.length - 1] != str2[str2.length - 1]) {
+      return "";
+    }
+    for (i = 0; i < str1.length && i < str2.length; i++) {
+      if (str1[str1.length - (i + 1)] != str2[str2.length - (i + 1)]) {
+        return str1.slice(-i);
+      }
+    }
+    return str1.slice(-i);
+  }
+  function replacePrefix(string3, oldPrefix, newPrefix) {
+    if (string3.slice(0, oldPrefix.length) != oldPrefix) {
+      throw Error(`string ${JSON.stringify(string3)} doesn't start with prefix ${JSON.stringify(oldPrefix)}; this is a bug`);
+    }
+    return newPrefix + string3.slice(oldPrefix.length);
+  }
+  function replaceSuffix(string3, oldSuffix, newSuffix) {
+    if (!oldSuffix) {
+      return string3 + newSuffix;
+    }
+    if (string3.slice(-oldSuffix.length) != oldSuffix) {
+      throw Error(`string ${JSON.stringify(string3)} doesn't end with suffix ${JSON.stringify(oldSuffix)}; this is a bug`);
+    }
+    return string3.slice(0, -oldSuffix.length) + newSuffix;
+  }
+  function removePrefix(string3, oldPrefix) {
+    return replacePrefix(string3, oldPrefix, "");
+  }
+  function removeSuffix(string3, oldSuffix) {
+    return replaceSuffix(string3, oldSuffix, "");
+  }
+  function maximumOverlap(string1, string22) {
+    return string22.slice(0, overlapCount(string1, string22));
+  }
+  function overlapCount(a, b) {
+    let startA = 0;
+    if (a.length > b.length) {
+      startA = a.length - b.length;
+    }
+    let endB = b.length;
+    if (a.length < b.length) {
+      endB = a.length;
+    }
+    const map = Array(endB);
+    let k = 0;
+    map[0] = 0;
+    for (let j = 1; j < endB; j++) {
+      if (b[j] == b[k]) {
+        map[j] = map[k];
+      } else {
+        map[j] = k;
+      }
+      while (k > 0 && b[j] != b[k]) {
+        k = map[k];
+      }
+      if (b[j] == b[k]) {
+        k++;
+      }
+    }
+    k = 0;
+    for (let i = startA; i < a.length; i++) {
+      while (k > 0 && a[i] != b[k]) {
+        k = map[k];
+      }
+      if (a[i] == b[k]) {
+        k++;
+      }
+    }
+    return k;
+  }
+  function trailingWs(string3) {
+    let i;
+    for (i = string3.length - 1; i >= 0; i--) {
+      if (!string3[i].match(/\s/)) {
+        break;
+      }
+    }
+    return string3.substring(i + 1);
+  }
+  function leadingWs(string3) {
+    const match = string3.match(/^\s*/);
+    return match ? match[0] : "";
+  }
+
+  // node_modules/diff/libesm/diff/word.js
+  var extendedWordChars = "a-zA-Z0-9_\\u{AD}\\u{C0}-\\u{D6}\\u{D8}-\\u{F6}\\u{F8}-\\u{2C6}\\u{2C8}-\\u{2D7}\\u{2DE}-\\u{2FF}\\u{1E00}-\\u{1EFF}";
+  var tokenizeIncludingWhitespace = new RegExp(`[${extendedWordChars}]+|\\s+|[^${extendedWordChars}]`, "ug");
+  var WordDiff = class extends Diff {
+    equals(left, right, options) {
+      if (options.ignoreCase) {
+        left = left.toLowerCase();
+        right = right.toLowerCase();
+      }
+      return left.trim() === right.trim();
+    }
+    tokenize(value, options = {}) {
+      let parts;
+      if (options.intlSegmenter) {
+        const segmenter = options.intlSegmenter;
+        if (segmenter.resolvedOptions().granularity != "word") {
+          throw new Error('The segmenter passed must have a granularity of "word"');
+        }
+        parts = [];
+        for (const segmentObj of Array.from(segmenter.segment(value))) {
+          const segment = segmentObj.segment;
+          if (parts.length && /\s/.test(parts[parts.length - 1]) && /\s/.test(segment)) {
+            parts[parts.length - 1] += segment;
+          } else {
+            parts.push(segment);
+          }
+        }
+      } else {
+        parts = value.match(tokenizeIncludingWhitespace) || [];
+      }
+      const tokens = [];
+      let prevPart = null;
+      parts.forEach((part) => {
+        if (/\s/.test(part)) {
+          if (prevPart == null) {
+            tokens.push(part);
+          } else {
+            tokens.push(tokens.pop() + part);
+          }
+        } else if (prevPart != null && /\s/.test(prevPart)) {
+          if (tokens[tokens.length - 1] == prevPart) {
+            tokens.push(tokens.pop() + part);
+          } else {
+            tokens.push(prevPart + part);
+          }
+        } else {
+          tokens.push(part);
+        }
+        prevPart = part;
+      });
+      return tokens;
+    }
+    join(tokens) {
+      return tokens.map((token, i) => {
+        if (i == 0) {
+          return token;
+        } else {
+          return token.replace(/^\s+/, "");
+        }
+      }).join("");
+    }
+    postProcess(changes, options) {
+      if (!changes || options.oneChangePerToken) {
+        return changes;
+      }
+      let lastKeep = null;
+      let insertion = null;
+      let deletion = null;
+      changes.forEach((change) => {
+        if (change.added) {
+          insertion = change;
+        } else if (change.removed) {
+          deletion = change;
+        } else {
+          if (insertion || deletion) {
+            dedupeWhitespaceInChangeObjects(lastKeep, deletion, insertion, change);
+          }
+          lastKeep = change;
+          insertion = null;
+          deletion = null;
+        }
+      });
+      if (insertion || deletion) {
+        dedupeWhitespaceInChangeObjects(lastKeep, deletion, insertion, null);
+      }
+      return changes;
+    }
+  };
+  var wordDiff = new WordDiff();
+  function diffWords(oldStr, newStr, options) {
+    if ((options === null || options === void 0 ? void 0 : options.ignoreWhitespace) != null && !options.ignoreWhitespace) {
+      return diffWordsWithSpace(oldStr, newStr, options);
+    }
+    return wordDiff.diff(oldStr, newStr, options);
+  }
+  function dedupeWhitespaceInChangeObjects(startKeep, deletion, insertion, endKeep) {
+    if (deletion && insertion) {
+      const oldWsPrefix = leadingWs(deletion.value);
+      const oldWsSuffix = trailingWs(deletion.value);
+      const newWsPrefix = leadingWs(insertion.value);
+      const newWsSuffix = trailingWs(insertion.value);
+      if (startKeep) {
+        const commonWsPrefix = longestCommonPrefix(oldWsPrefix, newWsPrefix);
+        startKeep.value = replaceSuffix(startKeep.value, newWsPrefix, commonWsPrefix);
+        deletion.value = removePrefix(deletion.value, commonWsPrefix);
+        insertion.value = removePrefix(insertion.value, commonWsPrefix);
+      }
+      if (endKeep) {
+        const commonWsSuffix = longestCommonSuffix(oldWsSuffix, newWsSuffix);
+        endKeep.value = replacePrefix(endKeep.value, newWsSuffix, commonWsSuffix);
+        deletion.value = removeSuffix(deletion.value, commonWsSuffix);
+        insertion.value = removeSuffix(insertion.value, commonWsSuffix);
+      }
+    } else if (insertion) {
+      if (startKeep) {
+        const ws = leadingWs(insertion.value);
+        insertion.value = insertion.value.substring(ws.length);
+      }
+      if (endKeep) {
+        const ws = leadingWs(endKeep.value);
+        endKeep.value = endKeep.value.substring(ws.length);
+      }
+    } else if (startKeep && endKeep) {
+      const newWsFull = leadingWs(endKeep.value), delWsStart = leadingWs(deletion.value), delWsEnd = trailingWs(deletion.value);
+      const newWsStart = longestCommonPrefix(newWsFull, delWsStart);
+      deletion.value = removePrefix(deletion.value, newWsStart);
+      const newWsEnd = longestCommonSuffix(removePrefix(newWsFull, newWsStart), delWsEnd);
+      deletion.value = removeSuffix(deletion.value, newWsEnd);
+      endKeep.value = replacePrefix(endKeep.value, newWsFull, newWsEnd);
+      startKeep.value = replaceSuffix(startKeep.value, newWsFull, newWsFull.slice(0, newWsFull.length - newWsEnd.length));
+    } else if (endKeep) {
+      const endKeepWsPrefix = leadingWs(endKeep.value);
+      const deletionWsSuffix = trailingWs(deletion.value);
+      const overlap = maximumOverlap(deletionWsSuffix, endKeepWsPrefix);
+      deletion.value = removeSuffix(deletion.value, overlap);
+    } else if (startKeep) {
+      const startKeepWsSuffix = trailingWs(startKeep.value);
+      const deletionWsPrefix = leadingWs(deletion.value);
+      const overlap = maximumOverlap(startKeepWsSuffix, deletionWsPrefix);
+      deletion.value = removePrefix(deletion.value, overlap);
+    }
+  }
+  var WordsWithSpaceDiff = class extends Diff {
+    tokenize(value) {
+      const regex = new RegExp(`(\\r?\\n)|[${extendedWordChars}]+|[^\\S\\n\\r]+|[^${extendedWordChars}]`, "ug");
+      return value.match(regex) || [];
+    }
+  };
+  var wordsWithSpaceDiff = new WordsWithSpaceDiff();
+  function diffWordsWithSpace(oldStr, newStr, options) {
+    return wordsWithSpaceDiff.diff(oldStr, newStr, options);
+  }
+
+  // web/src/translate-logic.js
+  var BLANK_MARKER = "___";
+  var TOKEN_PATTERN = /[\p{L}\p{N}]+(?:['’][\p{L}\p{N}]+)*/gu;
+  var SOUND_TAG_PATTERN = /\[sound:[^\]]+\]/i;
+  function normalizeText(value) {
+    return tokenizeComparableText(value).join(" ");
+  }
+  function tokenizeComparableText(value) {
+    var normalized = String(value || "").normalize("NFKC");
+    var tokens = normalized.match(TOKEN_PATTERN);
+    return tokens ? tokens.map(function(token) {
+      return token.toLocaleLowerCase();
+    }) : [];
+  }
+  function buildAcceptedAnswers(cardData) {
+    return [cardData.german].filter(function(answer) {
+      return !!normalizeText(answer);
+    });
+  }
+  function hasPlayableAudio(value) {
+    return SOUND_TAG_PATTERN.test(String(value || ""));
+  }
+  function buildStandardEvaluation(submitted, acceptedAnswers) {
+    var normalizedSubmitted = normalizeText(submitted);
+    var candidates = acceptedAnswers.map(function(expected) {
+      return buildCandidateEvaluation(normalizedSubmitted, expected);
+    });
+    if (!candidates.length) {
+      return {
+        isCorrect: false,
+        expected: "",
+        normalizedExpected: "",
+        normalizedSubmitted,
+        diffParts: []
+      };
+    }
+    candidates.sort(function(left, right) {
+      if (left.isCorrect !== right.isCorrect) {
+        return left.isCorrect ? -1 : 1;
+      }
+      if (left.distance !== right.distance) {
+        return left.distance - right.distance;
+      }
+      return left.expected.localeCompare(right.expected);
+    });
+    var best = candidates[0];
+    return {
+      isCorrect: best.isCorrect,
+      expected: best.expected,
+      normalizedExpected: best.normalizedExpected,
+      normalizedSubmitted,
+      diffParts: best.diffParts
+    };
+  }
+  function splitFillBlankPattern(fillBlank) {
+    var source = String(fillBlank || "");
+    if (!source) {
+      return [];
+    }
+    var pieces = [];
+    var index2 = 0;
+    while (index2 < source.length) {
+      var nextBlank = source.indexOf(BLANK_MARKER, index2);
+      if (nextBlank === -1) {
+        pieces.push({ type: "text", value: source.slice(index2) });
+        break;
+      }
+      if (nextBlank > index2) {
+        pieces.push({ type: "text", value: source.slice(index2, nextBlank) });
+      }
+      pieces.push({ type: "blank" });
+      index2 = nextBlank + BLANK_MARKER.length;
+    }
+    if (!pieces.length) {
+      pieces.push({ type: "text", value: source });
+    }
+    return pieces;
+  }
+  function extractBlankAnswers(german, fillBlank) {
+    var source = String(fillBlank || "");
+    if (!source.includes(BLANK_MARKER)) {
+      return [];
+    }
+    var expression = source.split(BLANK_MARKER).map(escapeLiteralForBlankPattern).join("([\\s\\S]+?)");
+    var match = new RegExp("^" + expression + "$", "u").exec(String(german || ""));
+    if (!match) {
+      return [];
+    }
+    return match.slice(1).map(function(value) {
+      return value.trim();
+    });
+  }
+  function buildFillBlankEvaluation(submittedBlanks, german, fillBlank) {
+    var expectedBlanks = extractBlankAnswers(german, fillBlank);
+    var normalizedExpected = expectedBlanks.map(normalizeText);
+    var normalizedSubmitted = submittedBlanks.map(normalizeText);
+    var isCorrect = expectedBlanks.length > 0 && expectedBlanks.length === submittedBlanks.length && normalizedExpected.every(function(expected, index2) {
+      return expected === normalizedSubmitted[index2];
+    });
+    return {
+      isCorrect,
+      expectedBlanks,
+      normalizedExpected,
+      normalizedSubmitted,
+      diffPartsByBlank: expectedBlanks.map(function(expected, index2) {
+        return buildDiffParts(normalizedSubmitted[index2] || "", normalizeText(expected));
+      })
+    };
+  }
+  function buildCandidateEvaluation(normalizedSubmitted, expected) {
+    var normalizedExpected = normalizeText(expected);
+    var diffParts = buildDiffParts(normalizedSubmitted, normalizedExpected);
+    return {
+      expected,
+      normalizedExpected,
+      isCorrect: normalizedSubmitted === normalizedExpected && !!normalizedSubmitted,
+      diffParts,
+      distance: countChangedTokens(diffParts)
+    };
+  }
+  function buildDiffParts(normalizedSubmitted, normalizedExpected) {
+    return diffWords(normalizedSubmitted, normalizedExpected).map(function(part) {
+      return {
+        value: part.value,
+        kind: part.added ? "missing" : part.removed ? "wrong" : "correct"
+      };
+    });
+  }
+  function countChangedTokens(diffParts) {
+    return diffParts.reduce(function(count, part) {
+      if (part.kind === "correct") {
+        return count;
+      }
+      return count + tokenizeComparableText(part.value).length;
+    }, 0);
+  }
+  function escapeLiteralForBlankPattern(value) {
+    return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&").replace(/\s+/g, "\\s+");
+  }
+
+  // web/src/translate.js
+  function initTranslateCard(cardData) {
+    var fillBlankPieces = splitFillBlankPattern(cardData.fillBlank);
+    var blankCount = fillBlankPieces.filter(function(piece) {
+      return piece.type === "blank";
+    }).length;
+    var state = {
+      cardData,
+      acceptedAnswers: buildAcceptedAnswers(cardData),
+      checked: false,
+      pendingContinue: false,
+      solvedClean: false,
+      evaluation: null,
+      fillBlankPieces,
+      blankValues: new Array(blankCount).fill("")
+    };
+    prepareLayout2(cardData);
+    bindKeyboardShortcuts(state);
+    bindPrimaryAction2(state);
+    bindAudioAction(cardData);
+    bindRatingActions2();
+    bindInputTracking(state);
+    renderTranslate(state);
+  }
+  function prepareLayout2(cardData) {
+    var container = getRoot().getElementById("foggy-container");
+    var grid = getRoot().getElementById("foggy-grid");
+    var mcqView = getRoot().getElementById("foggy-mcq-view");
+    var translateView = getRoot().getElementById("foggy-translate-view");
+    var headerRun = getRoot().getElementById("foggy-run-btn");
+    var checkButton = getRoot().getElementById("foggy-check-btn");
+    container.classList.add("foggy-container--translate");
+    setHidden(grid, true);
+    setHidden(mcqView, true);
+    setHidden(translateView, false);
+    setHidden(headerRun, true);
+    checkButton.textContent = "Check";
+    checkButton.disabled = false;
+    getRoot().getElementById("foggy-translate-prompt-title").textContent = promptTitle(cardData.mode);
+  }
+  function bindKeyboardShortcuts(state) {
+    var view = getRoot().getElementById("foggy-translate-view");
+    view.addEventListener("keydown", function(event) {
+      if (event.key !== "Enter" || event.shiftKey || event.altKey || event.metaKey) {
+        return;
+      }
+      event.preventDefault();
+      handlePrimaryAction2(state);
+    });
+  }
+  function bindPrimaryAction2(state) {
+    var button = getRoot().getElementById("foggy-check-btn");
+    button.addEventListener("click", function() {
+      handlePrimaryAction2(state);
+    });
+  }
+  function bindAudioAction(cardData) {
+    var button = getRoot().getElementById("foggy-translate-audio-btn");
+    button.addEventListener("click", function() {
+      playCardAudio(cardData.audio);
+    });
+  }
+  function bindRatingActions2() {
+    ensureRatingRow({
+      id: "foggy-translate-rating-row",
+      ratings: FIRST_TRY_RATINGS,
+      hidden: true
+    });
+  }
+  function bindInputTracking(state) {
+    var standardInput = getRoot().getElementById("foggy-translate-input");
+    if (standardInput) {
+      standardInput.addEventListener("input", function() {
+        renderActions2(state);
+      });
+    }
+    var fillWrap = getRoot().getElementById("foggy-translate-fillblank");
+    if (fillWrap) {
+      fillWrap.addEventListener("input", function() {
+        renderActions2(state);
+      });
+    }
+  }
+  function handlePrimaryAction2(state) {
+    if (state.pendingContinue) {
+      answerCard(1);
+      return;
+    }
+    if (state.solvedClean) {
+      answerCard(3);
+      return;
+    }
+    var evaluation = evaluateSubmission(state);
+    state.evaluation = evaluation;
+    state.checked = true;
+    state.solvedClean = evaluation.isCorrect;
+    state.pendingContinue = !state.solvedClean;
+    playFeedbackSound(evaluation.isCorrect ? "correct" : "incorrect");
+    renderTranslate(state);
+  }
+  function evaluateSubmission(state) {
+    if (state.cardData.mode === "fill_blank") {
+      return buildFillBlankEvaluation(state.blankValues, state.cardData.german, state.cardData.fillBlank);
+    }
+    return buildStandardEvaluation(readStandardInput(), state.acceptedAnswers);
+  }
+  function renderTranslate(state) {
+    renderPrompt(state);
+    renderContext(state.cardData.context);
+    renderInputs(state);
+    renderFeedback2(state);
+    renderActions2(state);
+    focusInputIfNeeded(state);
+  }
+  function renderPrompt(state) {
+    var text3 = getRoot().getElementById("foggy-translate-prompt-text");
+    var audioButton = getRoot().getElementById("foggy-translate-audio-btn");
+    var englishReveal = getRoot().getElementById("foggy-translate-english-reveal");
+    setHidden(audioButton, !hasPlayableAudio(state.cardData.audio));
+    setHidden(englishReveal, true);
+    if (state.cardData.mode === "listen") {
+      text3.textContent = "Listen and type the German sentence you hear.";
+      if (state.checked) {
+        englishReveal.textContent = state.cardData.english || "";
+        setHidden(englishReveal, !state.cardData.english);
+      }
+      return;
+    }
+    text3.textContent = state.cardData.english || "";
+  }
+  function renderContext(contextValue) {
+    var container = getRoot().getElementById("foggy-translate-context");
+    if (!contextValue) {
+      container.replaceChildren();
+      setHidden(container, true);
+      return;
+    }
+    container.innerHTML = String(contextValue);
+    setHidden(container, false);
+  }
+  function renderInputs(state) {
+    var standardWrap = getRoot().getElementById("foggy-translate-standard-input");
+    var fillWrap = getRoot().getElementById("foggy-translate-fillblank");
+    setHidden(standardWrap, state.cardData.mode === "fill_blank");
+    setHidden(fillWrap, state.cardData.mode !== "fill_blank");
+    if (state.cardData.mode === "fill_blank") {
+      renderFillBlankInputs(state);
+      return;
+    }
+    var input = getRoot().getElementById("foggy-translate-input");
+    var oldDiff = getRoot().getElementById("foggy-translate-diff");
+    if (oldDiff)
+      oldDiff.remove();
+    if (state.checked && state.evaluation && !state.evaluation.isCorrect) {
+      setHidden(input, true);
+      var diff = document.createElement("div");
+      diff.id = "foggy-translate-diff";
+      diff.className = "foggy-translate-diff";
+      state.evaluation.diffParts.forEach(function(part) {
+        var span = document.createElement("span");
+        span.textContent = part.value;
+        span.className = "foggy-diff-" + part.kind;
+        diff.appendChild(span);
+      });
+      standardWrap.appendChild(diff);
+      return;
+    }
+    setHidden(input, false);
+    input.placeholder = state.cardData.mode === "listen" ? "Type the sentence in German" : "Translate to German";
+    input.disabled = state.checked;
+    input.classList.remove("is-correct", "is-wrong");
+    if (state.checked && state.evaluation) {
+      input.classList.add(state.evaluation.isCorrect ? "is-correct" : "is-wrong");
+    }
+  }
+  function renderFillBlankInputs(state) {
+    var container = getRoot().getElementById("foggy-translate-fillblank");
+    container.replaceChildren();
+    var sentence = document.createElement("div");
+    sentence.className = "foggy-translate-fillblank-sentence";
+    var blankIndex = 0;
+    state.fillBlankPieces.forEach(function(piece) {
+      if (piece.type === "text") {
+        sentence.appendChild(document.createTextNode(piece.value));
+        return;
+      }
+      var currentBlankIndex = blankIndex;
+      var input = document.createElement("input");
+      input.type = "text";
+      input.className = "foggy-translate-blank-input";
+      input.value = state.blankValues[currentBlankIndex] || "";
+      input.placeholder = "blank";
+      input.disabled = state.checked;
+      input.dataset.blankIndex = String(currentBlankIndex);
+      input.addEventListener("input", function(event) {
+        state.blankValues[currentBlankIndex] = event.target.value;
+      });
+      if (state.checked && state.evaluation) {
+        var blankCorrect = state.evaluation.normalizedExpected && state.evaluation.normalizedExpected[currentBlankIndex] === state.evaluation.normalizedSubmitted[currentBlankIndex];
+        input.classList.add(blankCorrect ? "is-correct" : "is-wrong");
+      }
+      sentence.appendChild(input);
+      blankIndex += 1;
+    });
+    container.appendChild(sentence);
+  }
+  function renderFeedback2(state) {
+    var notes = getRoot().getElementById("foggy-translate-notes");
+    var old = getRoot().getElementById("foggy-translate-correction");
+    if (old)
+      old.remove();
+    if (!state.checked || !state.evaluation) {
+      setHidden(notes, true);
+      return;
+    }
+    if (state.cardData.notes) {
+      notes.textContent = state.cardData.notes;
+      setHidden(notes, false);
+    } else {
+      setHidden(notes, true);
+    }
+    if (!state.evaluation.isCorrect && state.cardData.mode === "fill_blank") {
+      var correction = document.createElement("div");
+      correction.id = "foggy-translate-correction";
+      correction.className = "foggy-translate-correction";
+      correction.textContent = state.cardData.german || "";
+      var anchor = getRoot().getElementById("foggy-translate-fillblank");
+      anchor.parentNode.insertBefore(correction, anchor.nextSibling);
+    }
+  }
+  function renderActions2(state) {
+    var checkBtn = getRoot().getElementById("foggy-check-btn");
+    var ratingRow = getRoot().getElementById("foggy-translate-rating-row");
+    if (state.pendingContinue) {
+      setHidden(ratingRow, true);
+      checkBtn.textContent = "Continue";
+      checkBtn.disabled = false;
+      return;
+    }
+    if (state.solvedClean) {
+      setHidden(ratingRow, false);
+      checkBtn.textContent = "Continue";
+      checkBtn.disabled = false;
+      return;
+    }
+    setHidden(ratingRow, true);
+    checkBtn.textContent = "Check";
+    checkBtn.disabled = !hasSubmissionValue(state);
+  }
+  function hasSubmissionValue(state) {
+    if (state.cardData.mode === "fill_blank") {
+      return state.blankValues.every(function(value) {
+        return String(value || "").trim();
+      });
+    }
+    return !!readStandardInput().trim();
+  }
+  function focusInputIfNeeded(state) {
+    if (state.checked) {
+      return;
+    }
+    if (state.cardData.mode === "fill_blank") {
+      var blank = getRoot().querySelector(".foggy-translate-blank-input");
+      if (blank) {
+        blank.focus();
+      }
+      return;
+    }
+    var input = getRoot().getElementById("foggy-translate-input");
+    if (input) {
+      input.focus();
+    }
+  }
+  function readStandardInput() {
+    var input = getRoot().getElementById("foggy-translate-input");
+    return input ? input.value : "";
+  }
+  function promptTitle(mode) {
+    if (mode === "listen") {
+      return "Listen closely";
+    }
+    if (mode === "fill_blank") {
+      return "Fill in the blanks";
+    }
+    return "Translate to German";
+  }
+
   // web/src/left-tabs.js
   function initLeftTabs(cardData, onSolutionAccess) {
     var tabs = getRoot().querySelectorAll("[data-left-tab]");
@@ -5863,6 +6791,82 @@
         setHidden(solutionPanel, target !== "solution");
       });
     });
+  }
+
+  // web/src/wrapped-review.js
+  var currentWrappedReview = null;
+  var continueBound = false;
+  function initWrappedReview(cardData) {
+    currentWrappedReview = cardData && cardData.wrappedReview ? cardData.wrappedReview : null;
+    renderProgress();
+    renderReward();
+    bindContinueAction();
+  }
+  function bindContinueAction() {
+    if (continueBound) {
+      return;
+    }
+    var button = getRoot().getElementById("foggy-review-reward-continue");
+    if (!button) {
+      return;
+    }
+    button.addEventListener("click", function() {
+      if (!currentWrappedReview) {
+        return;
+      }
+      continueWrappedReward();
+      currentWrappedReview = Object.assign({}, currentWrappedReview, {
+        progress: 0,
+        showReward: false
+      });
+      renderProgress();
+      renderReward();
+    });
+    continueBound = true;
+  }
+  function renderProgress() {
+    var progress = getRoot().getElementById("foggy-review-progress");
+    var track = getRoot().getElementById("foggy-review-progress-track");
+    if (!progress || !track || !currentWrappedReview || !currentWrappedReview.pillCount) {
+      if (progress) {
+        progress.setAttribute("aria-hidden", "true");
+      }
+      setHidden(progress, true);
+      return;
+    }
+    var pillCount = currentWrappedReview.pillCount;
+    var filled = currentWrappedReview.progress || 0;
+    track.style.setProperty("--foggy-review-progress-pill-count", String(pillCount));
+    track.style.gridTemplateColumns = "repeat(" + pillCount + ", minmax(0, 1fr))";
+    track.replaceChildren();
+    for (var index2 = 0; index2 < pillCount; index2 += 1) {
+      var segment = document.createElement("span");
+      segment.className = "foggy-review-progress-segment";
+      if (index2 < filled) {
+        segment.classList.add("is-filled");
+      }
+      if (index2 === pillCount - 1) {
+        segment.classList.add("is-goal");
+      }
+      segment.setAttribute("aria-hidden", "true");
+      track.appendChild(segment);
+    }
+    progress.setAttribute("aria-label", progressLabel(filled, pillCount));
+    progress.setAttribute("aria-hidden", "false");
+    setHidden(progress, false);
+  }
+  function renderReward() {
+    var reward = getRoot().getElementById("foggy-review-reward");
+    var image = getRoot().getElementById("foggy-review-reward-image");
+    if (!reward || !image || !currentWrappedReview || !currentWrappedReview.showReward) {
+      setHidden(reward, true);
+      return;
+    }
+    image.src = currentWrappedReview.rewardImageUrl || "";
+    setHidden(reward, false);
+  }
+  function progressLabel(progress, pillCount) {
+    return "Review streak: " + progress + " of " + pillCount + " cards";
   }
 
   // web/src/index.js
@@ -5896,8 +6900,13 @@
     initIcons();
     initHeader(cardData);
     initHomeButton();
+    initWrappedReview(cardData);
     if (cardData.kind === "mcq") {
       initMcqCard(cardData);
+      return;
+    }
+    if (cardData.kind === "translate") {
+      initTranslateCard(cardData);
       return;
     }
     getRoot().getElementById("foggy-title").textContent = cardData.title;

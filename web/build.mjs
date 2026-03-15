@@ -12,6 +12,7 @@ const cssSources = [
   "web/styles/testcases.css",
   "web/styles/results.css",
   "web/styles/mcq.css",
+  "web/styles/translate.css",
   "web/styles/mobile.css",
 ];
 

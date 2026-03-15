@@ -49,61 +49,71 @@
   width: 100%;
   padding: 14px 16px;
   border: 2px solid var(--foggy-border);
-  border-bottom-width: 4px;
   border-radius: 12px;
   background: transparent;
   color: var(--foggy-text);
   text-align: left;
   cursor: pointer;
+  box-shadow: 0 2px 0 var(--foggy-border);
   transition:
     transform 0.1s ease,
-    border-width 0.1s ease,
+    box-shadow 0.1s ease,
     border-color 0.15s ease,
     background 0.15s ease;
 }
 
 .foggy-mcq-choice:active:not(:disabled) {
   transform: translateY(2px);
+  box-shadow: 0 0 0 var(--foggy-border);
 }
 
 .foggy-mcq-choice:hover:not(:disabled):not(.is-selected):not(.is-correct):not(.is-eliminated) {
+  transform: translateY(-2px);
   border-color: var(--foggy-border-hover);
-  background: oklch(0.98 0 0 / 0.03);
+  box-shadow: 0 4px 0 var(--foggy-border-hover);
+  background: var(--foggy-white-wash-3);
+}
+
+/* Match the hover selector specificity so neutral choices look pressed on click. */
+.foggy-mcq-choice:active:not(:disabled):not(.is-selected):not(.is-correct):not(.is-eliminated) {
+  transform: translateY(2px);
+  box-shadow: 0 0 0 var(--foggy-border);
 }
 
 .foggy-mcq-choice.is-selected {
-  border-color: oklch(0.85 0.15 145);
-  background: oklch(0.85 0.15 145 / 0.06);
+  border-color: var(--foggy-accent);
+  box-shadow: 0 2px 0 var(--foggy-accent);
+  background: var(--foggy-accent-tint);
 }
 
 .foggy-mcq-choice.is-selected .foggy-mcq-choice-index {
-  border-color: oklch(0.85 0.15 145);
-  color: oklch(0.85 0.15 145);
+  border-color: var(--foggy-accent);
+  color: var(--foggy-accent);
 }
 
 .foggy-mcq-choice.is-correct {
-  border-color: oklch(0.85 0.15 145 / 0.5);
-  background: oklch(0.85 0.15 145 / 0.06);
+  border-color: var(--foggy-accent-muted);
+  box-shadow: 0 2px 0 var(--foggy-accent-muted);
+  background: var(--foggy-accent-tint);
 }
 
 .foggy-mcq-choice.is-correct .foggy-mcq-choice-index {
-  border-color: oklch(0.85 0.15 145 / 0.5);
-  color: oklch(0.85 0.15 145 / 0.5);
+  border-color: var(--foggy-accent-muted);
+  color: var(--foggy-accent-muted);
 }
 
 .foggy-mcq-choice.is-eliminated,
 .foggy-mcq-choice:disabled:not(.is-correct) {
   background: transparent;
-  border-color: oklch(0.98 0 0 / 0.04);
+  border-color: var(--foggy-white-wash-4);
+  box-shadow: none;
   color: var(--foggy-text-dim);
   cursor: not-allowed;
-  transform: translateY(2px);
-  border-bottom-width: 2px;
 }
 
 .foggy-mcq-choice.is-eliminated .foggy-mcq-choice-index,
 .foggy-mcq-choice:disabled:not(.is-correct) .foggy-mcq-choice-index {
-  border-color: oklch(0.98 0 0 / 0.04);
+  border-color: var(--foggy-white-wash-4);
   color: var(--foggy-text-dim);
 }
 
@@ -140,13 +150,13 @@
 }
 
 .foggy-mcq-feedback.is-correct {
-  border-color: oklch(0.85 0.15 145 / 0.3);
-  background: oklch(0.85 0.15 145 / 0.06);
+  border-color: var(--foggy-accent-subtle);
+  background: var(--foggy-accent-tint);
 }
 
 .foggy-mcq-feedback.is-wrong {
-  border-color: oklch(0.65 0.2 25 / 0.3);
-  background: oklch(0.65 0.2 25 / 0.06);
+  border-color: var(--foggy-danger-subtle);
+  background: var(--foggy-danger-tint);
 }
 
 .foggy-mcq-feedback-label {
@@ -155,11 +165,11 @@
 }
 
 .foggy-mcq-feedback.is-correct .foggy-mcq-feedback-label {
-  color: oklch(0.85 0.15 145);
+  color: var(--foggy-accent);
 }
 
 .foggy-mcq-feedback.is-wrong .foggy-mcq-feedback-label {
-  color: oklch(0.65 0.2 25);
+  color: var(--foggy-danger);
 }
 
 .foggy-mcq-feedback-notes {

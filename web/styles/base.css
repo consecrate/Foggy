@@ -1,47 +1,75 @@
+@font-face {
+  font-family: "Google Sans Flex";
+  font-style: normal;
+  font-weight: 1 1000;
+  font-display: swap;
+  src: url("../fonts/GoogleSansFlex-Variable.woff2") format("truetype");
+}
+
 :host {
-  /* ── Backgrounds (green-tinted, Mimo-style) ── */
-  --foggy-bg: oklch(0.24 0.04 145);
-  --foggy-bg-muted: oklch(0.28 0.045 145);
-  --foggy-bg-panel: oklch(0.32 0.05 145);
-  --foggy-bg-panel-strong: oklch(0.26 0.042 145);
-  --foggy-bg-panel-header: oklch(0.32 0.05 145);
-  --foggy-border: oklch(0.40 0.06 145);
-  --foggy-border-hover: oklch(0.46 0.08 145);
-  --foggy-surface: oklch(0.36 0.05 145);
+  /* ── Backgrounds (dark blue-grey, Duolingo-style) ── */
+  --foggy-bg: oklch(0.20 0.01 240);
+  --foggy-bg-muted: oklch(0.24 0.01 240);
+  --foggy-bg-panel: oklch(0.28 0.01 240);
+  --foggy-bg-panel-strong: oklch(0.22 0.01 240);
+  --foggy-bg-panel-header: oklch(0.28 0.01 240);
+  --foggy-border: oklch(0.35 0.01 240);
+  --foggy-border-hover: oklch(0.42 0.01 240);
+  --foggy-surface: oklch(0.32 0.01 240);
   --foggy-divider-track: oklch(0 0 0 / 0);
-  --foggy-divider-handle: oklch(0.60 0.06 145 / 0.35);
-  --foggy-divider-handle-hover: oklch(0.85 0.15 145);
+  --foggy-divider-handle: oklch(0.60 0.02 240 / 0.35);
+  --foggy-divider-handle-hover: oklch(0.85 0.05 240);
   --foggy-divider-glow-hover: none;
   --foggy-divider-grip-length: 16px;
   --foggy-divider-grip-thickness: 2px;
   --foggy-divider-track-thickness: 2px;
 
   /* ── Text — White hierarchy ── */
-  --foggy-text: oklch(0.98 0.01 145);
-  --foggy-text-muted: oklch(0.82 0.04 145);
-  --foggy-text-subtle: oklch(0.65 0.05 145);
-  --foggy-text-dim: oklch(0.50 0.04 145);
+  --foggy-text: oklch(0.98 0 0);
+  --foggy-text-muted: oklch(0.82 0.01 240);
+  --foggy-text-subtle: oklch(0.65 0.01 240);
+  --foggy-text-dim: oklch(0.50 0.01 240);
 
-  /* ── Mint Green — matching the mascot ── */
-  --foggy-accent: oklch(0.78 0.14 145);
-  --foggy-accent-hover: oklch(0.82 0.14 145);
-  --foggy-radius-code-block: 12px;
+  /* ── Accent (Duolingo Green) ── */
+  --foggy-accent: oklch(0.79 0.19 130);
+  --foggy-accent-hover: oklch(0.85 0.19 130);
+  --foggy-accent-dark: oklch(0.62 0.19 130);
+  --foggy-accent-light: oklch(0.85 0.19 130);
+  --foggy-accent-tint: oklch(0.79 0.19 130 / 0.06);
+  --foggy-accent-muted: oklch(0.79 0.19 130 / 0.5);
+  --foggy-accent-subtle: oklch(0.79 0.19 130 / 0.3);
+  --foggy-accent-ring: oklch(0.79 0.19 130 / 0.20);
+  --foggy-accent-wash: oklch(0.79 0.19 130 / 0.18);
 
   /* ── Semantic colours ── */
-  --foggy-case-pill-bg: oklch(0.30 0.045 145);
+  --foggy-success: oklch(0.79 0.19 130);
+  --foggy-success-hover: oklch(0.85 0.19 130);
+  --foggy-medium: oklch(0.80 0.16 85);
+  --foggy-warning: oklch(0.80 0.16 85);
+  --foggy-danger: oklch(0.60 0.20 25);
+  --foggy-danger-light: oklch(0.75 0.16 25);
+  --foggy-danger-tint: oklch(0.60 0.20 25 / 0.06);
+  --foggy-danger-subtle: oklch(0.60 0.20 25 / 0.3);
+  --foggy-rating-good: oklch(0.68 0.15 250);
+
+  /* ── White washes (transparent overlays) ── */
+  --foggy-white-wash-3: oklch(0.98 0 0 / 0.03);
+  --foggy-white-wash-4: oklch(0.98 0 0 / 0.04);
+  --foggy-white-wash-6: oklch(0.98 0 0 / 0.06);
+  --foggy-white-wash-8: oklch(0.98 0 0 / 0.08);
+  --foggy-white-wash-10: oklch(0.98 0 0 / 0.1);
+
+  /* ── UI chrome ── */
+  --foggy-case-pill-bg: oklch(0.26 0.01 240);
   --foggy-case-pill-edge: transparent;
-  --foggy-case-pill-hover: oklch(0.35 0.05 145);
+  --foggy-case-pill-hover: oklch(0.30 0.01 240);
   --foggy-case-pill-hover-edge: transparent;
-  --foggy-case-pill-active: oklch(0.78 0.14 145 / 0.15);
+  --foggy-case-pill-active: var(--foggy-accent-tint);
   --foggy-case-pill-active-edge: transparent;
-  --foggy-success: oklch(0.78 0.14 145);
-  --foggy-success-hover: oklch(0.74 0.13 145);
-  --foggy-medium: oklch(0.78 0.14 145);
-  --foggy-warning: oklch(0.85 0.16 85);
-  --foggy-danger: oklch(0.75 0.16 25);
-  --foggy-code-bg: oklch(0.85 0.15 145 / 0.10);
+  --foggy-code-bg: oklch(0.30 0.01 240);
+  --foggy-radius-code-block: 12px;
   --foggy-font-sans:
-    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    "Google Sans Flex", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --foggy-font-mono: "SF Mono", "Fira Code", "Cascadia Code", monospace;
 
   display: block;
@@ -52,6 +80,8 @@
   background: var(--foggy-bg);
   color: var(--foggy-text);
   font-family: var(--foggy-font-sans);
+  font-optical-sizing: auto;
+  font-variation-settings: "ROND" 100;
   overflow: hidden;
 }
 
@@ -68,6 +98,14 @@
   height: 100%;
   width: 100%;
   background: var(--foggy-bg);
+}
+
+#foggy-main {
+  position: relative;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
 }
 
 .is-hidden {

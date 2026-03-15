@@ -3,6 +3,7 @@ import { injectIcons } from "./icons.js";
 
 var LANG_EXT_MAP = {
   "python": "py",
+  "c++": "cpp",
   "javascript": "js",
   "html": "html",
   "css": "css",
@@ -28,7 +29,7 @@ var LANG_EXT_MAP = {
  * @param {string}      language  Language identifier (e.g. "python").
  */
 export function renderCodeBlock(parentEl, code, language) {
-  var normalizedLang = (language || "python").toLowerCase();
+  var normalizedLang = normalizeCodeLanguage(language);
   var ext = LANG_EXT_MAP[normalizedLang] || "txt";
 
   parentEl.replaceChildren();
@@ -68,4 +69,16 @@ export function renderCodeBlock(parentEl, code, language) {
     readOnly: true,
     showGutters: false,
   });
+}
+
+function normalizeCodeLanguage(language) {
+  var normalized = String(language || "python").toLowerCase().trim();
+
+  if (normalized === "c++" || normalized === "cxx" || normalized === "cc") {
+    return "cpp";
+  }
+  if (normalized === "py") {
+    return "python";
+  }
+  return normalized;
 }

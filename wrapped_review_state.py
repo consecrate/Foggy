@@ -15,6 +15,11 @@ class WrappedReviewState:
     cycle_start_index: int = 0
     reward_sequence: int = 0
     reward_key: int = 0
+    cycle_goal: int = 0
+    cycle_rewards_enabled: bool = True
+
+    def __post_init__(self) -> None:
+        self._reset_cycle()
 
     @property
     def progress(self) -> int:
@@ -22,7 +27,15 @@ class WrappedReviewState:
             return 0
 
         progress = self.current_index - self.cycle_start_index + 1
-        return max(0, min(self.reward_goal, progress))
+        return max(0, min(self.pill_count, progress))
+
+    @property
+    def pill_count(self) -> int:
+        return max(1, self.cycle_goal or self.reward_goal)
+
+    @property
+    def rewards_enabled(self) -> bool:
+        return self.cycle_rewards_enabled
 
     def reset(self) -> None:
         self.question_history.clear()
@@ -30,13 +43,16 @@ class WrappedReviewState:
         self.cycle_start_index = 0
         self.reward_sequence = 0
         self.reward_key = 0
+        self._reset_cycle()
 
     def continue_cycle(self) -> None:
         if self.current_index is None:
             self.cycle_start_index = len(self.question_history)
+            self._reset_cycle()
             return
 
         self.cycle_start_index = self.current_index + 1
+        self._reset_cycle()
 
     def undo(self) -> None:
         if self.current_index is None:
@@ -47,7 +63,7 @@ class WrappedReviewState:
 
     def current_state(self) -> tuple[int, bool, int]:
         progress = self.progress
-        return (progress, progress == self.reward_goal, self.reward_key)
+        return (progress, self.cycle_rewards_enabled and progress == self.pill_count, self.reward_key)
 
     @property
     def upcoming_reward_key(self) -> int:
@@ -56,15 +72,22 @@ class WrappedReviewState:
 
         return self.reward_sequence + 1
 
-    def state_for_question(self, card_id: int) -> tuple[int, bool, int]:
+    def state_for_question(
+        self,
+        card_id: int,
+        available_card_count: int | None = None,
+    ) -> tuple[int, bool, int]:
         reached_new_card = self._move_to_question(card_id)
+        if reached_new_card and self.current_index == self.cycle_start_index:
+            self._configure_cycle(available_card_count)
+
         progress = self.progress
 
-        if reached_new_card and progress == self.reward_goal:
+        if reached_new_card and self.cycle_rewards_enabled and progress == self.pill_count:
             self.reward_sequence += 1
             self.reward_key = self.reward_sequence
 
-        return (progress, progress == self.reward_goal, self.reward_key)
+        return (progress, self.cycle_rewards_enabled and progress == self.pill_count, self.reward_key)
 
     def _move_to_question(self, card_id: int) -> bool:
         if self.current_index is not None:
@@ -84,4 +107,20 @@ class WrappedReviewState:
         return True
 
     def _cycle_reward_already_assigned(self) -> bool:
-        return self.reward_key > 0 and len(self.question_history) - self.cycle_start_index >= self.reward_goal
+        return (
+            self.cycle_rewards_enabled
+            and self.reward_key > 0
+            and len(self.question_history) - self.cycle_start_index >= self.pill_count
+        )
+
+    def _configure_cycle(self, available_card_count: int | None) -> None:
+        if isinstance(available_card_count, int) and available_card_count > 0:
+            self.cycle_goal = min(self.reward_goal, available_card_count)
+        else:
+            self.cycle_goal = self.reward_goal
+
+        self.cycle_rewards_enabled = self.reward_goal > 0 and self.cycle_goal == self.reward_goal
+
+    def _reset_cycle(self) -> None:
+        self.cycle_goal = self.reward_goal
+        self.cycle_rewards_enabled = self.reward_goal > 0

@@ -9,7 +9,9 @@ import { renderResults, setRatingButtonsVisible } from "./results.js";
 import { setRoot, getRoot } from "./root.js";
 import { initTabs, setActiveTab } from "./tabs.js";
 import { populateTestcases } from "./testcases.js";
+import { initTranslateCard } from "./translate.js";
 import { initLeftTabs } from "./left-tabs.js";
+import { initWrappedReview } from "./wrapped-review.js";
 
 function init() {
   var dataEl = document.getElementById("foggy-data");
@@ -52,9 +54,15 @@ function init() {
   initIcons();
   initHeader(cardData);
   initHomeButton();
+  initWrappedReview(cardData);
 
   if (cardData.kind === "mcq") {
     initMcqCard(cardData);
+    return;
+  }
+
+  if (cardData.kind === "translate") {
+    initTranslateCard(cardData);
     return;
   }
 

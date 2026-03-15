@@ -1,6 +1,6 @@
-import { answerCard } from "./bridge.js";
 import { getRoot } from "./root.js";
 import { formatSerializedResult, hasDisplayValue } from "./format.js";
+import { REVIEW_RATINGS, ensureRatingRow, removeRatingRow } from "./rating-row.js";
 import {
   createDetailField,
   createDetailSection,
@@ -10,13 +10,6 @@ import {
   setHidden,
 } from "./ui.js";
 import { parseTestCases } from "./testcases.js";
-
-var RATINGS = [
-  { ease: 1, label: "Again", cls: "again" },
-  { ease: 2, label: "Hard", cls: "hard" },
-  { ease: 3, label: "Good", cls: "good" },
-  { ease: 4, label: "Easy", cls: "easy" },
-];
 
 export function renderResults(result, cardData) {
   var container = getRoot().getElementById("foggy-results-content");
@@ -116,38 +109,16 @@ export function renderResults(result, cardData) {
 }
 
 export function setRatingButtonsVisible(visible) {
-  var existing = getRoot().getElementById("foggy-rating-row");
-
   if (!visible) {
-    if (existing) {
-      existing.remove();
-    }
+    removeRatingRow("foggy-rating-row");
     return;
   }
 
-  if (existing) {
-    return;
-  }
-
-  var row = document.createElement("div");
-  row.id = "foggy-rating-row";
-  row.className = "foggy-rating-row";
-
-  var reversed = RATINGS.slice().reverse();
-  reversed.forEach(function (rating) {
-    var btn = document.createElement("button");
-    btn.type = "button";
-    btn.className = "foggy-rating-btn foggy-rating-btn--" + rating.cls;
-    btn.textContent = rating.label;
-    btn.addEventListener("click", function () {
-      answerCard(rating.ease);
-    });
-    row.appendChild(btn);
+  ensureRatingRow({
+    id: "foggy-rating-row",
+    ratings: REVIEW_RATINGS,
+    hidden: false,
   });
-
-  var bar = getRoot().getElementById("foggy-bottom-bar");
-  var runBtn = getRoot().getElementById("foggy-check-btn");
-  bar.insertBefore(row, runBtn);
 }
 
 function buildResultHeader(result, focusIndex) {

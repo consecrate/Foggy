@@ -1,0 +1,278 @@
+#foggy-translate-view {
+  flex: 1;
+  min-height: 0;
+  padding: 32px 24px 24px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  overflow-y: auto;
+  background: var(--foggy-bg);
+}
+
+#foggy-translate-shell {
+  width: min(100%, 720px);
+  margin: auto 0;
+}
+
+/* Remove the boxed layout entirely */
+.foggy-translate-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+#foggy-translate-prompt-title {
+  font-size: 30px;
+  line-height: 1.1;
+  color: var(--foggy-text);
+  margin-bottom: 12px;
+}
+
+#foggy-translate-speech-zone {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+/* Base styling for the speech bubble */
+.foggy-translate-speech-bubble {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 24px;
+  border: 2px solid var(--foggy-border);
+  border-radius: 16px;
+  background: transparent;
+}
+
+/* Add a tail pointer at the top left to mimic Duolingo style without the avatar */
+.foggy-translate-speech-bubble::before,
+.foggy-translate-speech-bubble::after {
+  content: "";
+  position: absolute;
+  top: -12px;
+  left: 24px;
+  width: 0;
+  height: 0;
+  border-style: solid;
+}
+
+/* Outer border color for triangle */
+.foggy-translate-speech-bubble::before {
+  border-width: 0 12px 12px 12px;
+  border-color: transparent transparent var(--foggy-border) transparent;
+}
+
+/* Inner inner color for triangle */
+.foggy-translate-speech-bubble::after {
+  border-width: 0 10px 10px 10px;
+  border-color: transparent transparent var(--foggy-bg) transparent;
+  top: -9px;
+  left: 26px;
+}
+
+#foggy-translate-prompt-text,
+#foggy-translate-english-reveal,
+#foggy-translate-notes {
+  color: var(--foggy-text);
+  font-size: 18px;
+  line-height: 1.6;
+}
+
+#foggy-translate-english-reveal {
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: oklch(0.98 0 0 / 0.04);
+  color: var(--foggy-text-muted);
+}
+
+#foggy-translate-notes,
+#foggy-translate-result {
+  padding: 16px;
+  border-radius: 16px;
+  background: oklch(0.98 0 0 / 0.04);
+  border: 1px solid oklch(0.98 0 0 / 0.05);
+}
+
+#foggy-translate-context {
+  color: var(--foggy-text-muted);
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+#foggy-translate-context img,
+#foggy-translate-context video {
+  display: flex;
+  justify-content: center;
+  margin: 0 auto;
+  max-width: 100%;
+  max-height: 360px; /* Keep media reasonably scaled */
+  border-radius: 12px;
+  object-fit: contain;
+}
+
+#foggy-translate-audio-btn {
+  appearance: none;
+  -webkit-appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  align-self: flex-start;
+  min-height: 42px;
+  padding: 0 18px;
+  border: 2px solid var(--foggy-border);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--foggy-text);
+  font-family: var(--foggy-font-sans);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.1s ease, border-color 0.1s ease, box-shadow 0.1s ease;
+  box-shadow: 0 2px 0 var(--foggy-border); /* 3D Button Press Effect */
+}
+
+#foggy-translate-audio-btn:hover {
+  border-color: var(--foggy-border-hover);
+  box-shadow: 0 4px 0 var(--foggy-border-hover);
+  transform: translateY(-2px);
+}
+
+#foggy-translate-audio-btn:active {
+  transform: translateY(2px);
+  box-shadow: 0 0 0 var(--foggy-border);
+}
+
+/* Larger inputs to match Duolingo style */
+#foggy-translate-input,
+.foggy-translate-blank-input {
+  width: 100%;
+  min-height: 66px;
+  padding: 18px 20px;
+  border: 2px solid var(--foggy-border);
+  border-radius: 16px;
+  background: transparent;
+  color: var(--foggy-text);
+  font-family: var(--foggy-font-sans);
+  font-size: 20px;
+  line-height: 1.6;
+  resize: vertical;
+  outline: none;
+  box-shadow: 0 3px 0 var(--foggy-border);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+#foggy-translate-input:focus,
+.foggy-translate-blank-input:focus {
+  border-color: var(--foggy-accent);
+  box-shadow: 0 3px 0 var(--foggy-accent);
+}
+
+#foggy-translate-input:disabled,
+.foggy-translate-blank-input:disabled {
+  opacity: 0.72;
+}
+
+#foggy-translate-input.is-correct,
+.foggy-translate-blank-input.is-correct {
+  border-color: var(--foggy-success);
+  box-shadow: 0 3px 0 var(--foggy-success);
+  background: var(--foggy-accent-tint);
+}
+
+#foggy-translate-input.is-wrong,
+.foggy-translate-blank-input.is-wrong {
+  border-color: var(--foggy-danger);
+  box-shadow: 0 3px 0 var(--foggy-danger);
+  background: var(--foggy-danger-tint);
+}
+
+.foggy-translate-fillblank-sentence {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  color: var(--foggy-text);
+  font-size: 24px;
+  line-height: 1.7;
+}
+
+.foggy-translate-blank-input {
+  width: auto;
+  min-width: 180px;
+  min-height: 52px;
+  padding: 10px 14px;
+  font-size: 20px;
+}
+
+.foggy-translate-diff {
+  min-height: 66px;
+  padding: 18px 20px;
+  border: 2px solid var(--foggy-danger);
+  border-radius: 16px;
+  background: var(--foggy-danger-tint);
+  box-shadow: 0 3px 0 var(--foggy-danger);
+  font-family: var(--foggy-font-sans);
+  font-size: 20px;
+  line-height: 1.6;
+  color: var(--foggy-text);
+}
+
+.foggy-diff-correct {
+  color: var(--foggy-text);
+}
+
+.foggy-diff-wrong {
+  color: var(--foggy-danger-light);
+  text-decoration: line-through;
+}
+
+.foggy-diff-missing {
+  color: var(--foggy-success);
+  font-weight: 600;
+}
+
+.foggy-translate-correction {
+  color: var(--foggy-danger-light);
+  font-size: 17px;
+  line-height: 1.6;
+  padding: 8px 4px 0;
+}
+
+
+
+@media (max-width: 720px) {
+  #foggy-translate-view {
+    padding: 16px 12px 20px;
+  }
+
+  .foggy-translate-layout {
+    gap: 14px;
+  }
+
+  #foggy-translate-prompt-title {
+    font-size: 24px;
+  }
+
+  #foggy-translate-prompt-text,
+  #foggy-translate-english-reveal,
+  #foggy-translate-notes {
+    font-size: 16px;
+  }
+
+  .foggy-translate-speech-bubble {
+    padding: 18px;
+  }
+
+  .foggy-translate-fillblank-sentence {
+    font-size: 18px;
+  }
+}

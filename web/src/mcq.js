@@ -1,13 +1,9 @@
-import { answerCard } from "./bridge.js";
+import { answerCard, playFeedbackSound } from "./bridge.js";
 import { renderCodeBlock } from "./code-block.js";
+import { FIRST_TRY_RATINGS, ensureRatingRow } from "./rating-row.js";
 import { getRoot } from "./root.js";
 
 import { setHidden } from "./ui.js";
-
-var FIRST_TRY_RATINGS = [
-  { ease: 2, label: "Hard", cls: "hard" },
-  { ease: 3, label: "Good", cls: "good" },
-];
 
 export function initMcqCard(cardData) {
   var choiceConfig = buildChoices(cardData.choices);
@@ -71,25 +67,11 @@ function bindPrimaryAction(state) {
 }
 
 function bindRatingActions() {
-  var bar = getRoot().getElementById("foggy-bottom-bar");
-  var row = document.createElement("div");
-  row.id = "foggy-mcq-rating-row";
-  row.className = "foggy-rating-row is-hidden";
-
-  var reversed = FIRST_TRY_RATINGS.slice().reverse();
-  reversed.forEach(function (rating) {
-    var button = document.createElement("button");
-    button.type = "button";
-    button.className = "foggy-rating-btn foggy-rating-btn--" + rating.cls;
-    button.textContent = rating.label;
-    button.addEventListener("click", function () {
-      answerCard(rating.ease);
-    });
-    row.appendChild(button);
+  ensureRatingRow({
+    id: "foggy-mcq-rating-row",
+    ratings: FIRST_TRY_RATINGS,
+    hidden: true,
   });
-
-  var checkBtn = getRoot().getElementById("foggy-check-btn");
-  bar.insertBefore(row, checkBtn);
 }
 
 function handlePrimaryAction(state) {
@@ -113,6 +95,8 @@ function handlePrimaryAction(state) {
   }
 
   if (selectedChoice.isCorrect) {
+    playFeedbackSound("correct");
+
     if (state.hadWrongAttempt) {
       state.pendingContinue = true;
       renderMcq(state);
@@ -124,6 +108,7 @@ function handlePrimaryAction(state) {
     return;
   }
 
+  playFeedbackSound("incorrect");
   selectedChoice.isEliminated = true;
   state.lastEliminatedChoice = selectedChoice;
   state.selectedId = null;
@@ -306,4 +291,3 @@ function findChoice(choices, id) {
     return choice.id === id;
   });
 }
-

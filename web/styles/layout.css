@@ -86,7 +86,7 @@
   border-radius: 3px;
   font-family: var(--foggy-font-mono);
   font-size: 13px;
-  color: oklch(0.85 0.15 145);
+  color: var(--foggy-accent-light);
 }
 
 #foggy-problem #foggy-description pre {

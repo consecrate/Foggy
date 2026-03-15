@@ -1,4 +1,17 @@
 @media (max-width: 720px) {
+  #foggy-review-progress-track {
+    --foggy-review-progress-gap: 6px;
+  }
+
+  #foggy-bottom-bar {
+    padding: 12px 14px;
+  }
+
+  .foggy-rating-row {
+    width: 100%;
+    justify-content: flex-end;
+  }
+
   .foggy-tab-content {
     padding: 10px 14px 14px;
   }
@@ -15,5 +28,18 @@
   .foggy-case-value {
     font-size: 13px;
     padding: 12px 14px;
+  }
+
+  #foggy-review-reward {
+    padding: 16px 12px;
+  }
+
+  .foggy-review-reward-panel {
+    padding: 18px;
+    border-radius: 22px;
+  }
+
+  .foggy-review-reward-title {
+    font-size: 26px;
   }
 }

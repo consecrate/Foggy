@@ -5,10 +5,12 @@
     "build:web": "node web/build.mjs",
     "build": "npm run build:web && npm run build:cm && npm run build:split",
     "build:cm": "node web/vendor/codemirror/build.mjs",
-    "build:split": "node web/vendor/split-grid/build.mjs"
+    "build:split": "node web/vendor/split-grid/build.mjs",
+    "test:web": "node --test web/src/translate.test.js"
   },
   "devDependencies": {
     "@codemirror/commands": "^6.0.0",
+    "@codemirror/lang-cpp": "^6.0.3",
     "@codemirror/lang-python": "^6.0.0",
     "@codemirror/state": "^6.0.0",
     "@codemirror/theme-one-dark": "^6.0.0",
@@ -17,5 +19,8 @@
     "esbuild": "^0.20.0",
     "mdast-util-from-markdown": "^2.0.2",
     "split-grid": "^1.0.11"
+  },
+  "dependencies": {
+    "diff": "^8.0.3"
   }
 }

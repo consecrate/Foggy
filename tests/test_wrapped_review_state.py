@@ -96,6 +96,35 @@ class WrappedReviewStateTests(unittest.TestCase):
         state.continue_cycle()
         self.assertEqual(state.upcoming_reward_key, 2)
 
+    def test_short_cycle_shows_only_remaining_pills_without_reward(self) -> None:
+        state = WrappedReviewState(reward_goal=10)
+
+        for card_id in range(1, 8):
+            progress, show_reward, reward_key = state.state_for_question(card_id, available_card_count=7)
+
+        self.assertEqual((progress, show_reward, reward_key), (7, False, 0))
+        self.assertEqual(state.pill_count, 7)
+        self.assertFalse(state.rewards_enabled)
+
+    def test_final_partial_cycle_after_reward_has_no_extra_reward(self) -> None:
+        state = WrappedReviewState(reward_goal=10)
+
+        for card_id in range(1, 11):
+            progress, show_reward, reward_key = state.state_for_question(card_id, available_card_count=10)
+
+        self.assertEqual((progress, show_reward, reward_key), (10, True, 1))
+
+        state.continue_cycle()
+        progress, show_reward, reward_key = state.state_for_question(11, available_card_count=4)
+        self.assertEqual((progress, show_reward, reward_key), (1, False, 1))
+        self.assertEqual(state.pill_count, 4)
+        self.assertFalse(state.rewards_enabled)
+
+        for card_id in range(12, 15):
+            progress, show_reward, reward_key = state.state_for_question(card_id, available_card_count=4)
+
+        self.assertEqual((progress, show_reward, reward_key), (4, False, 1))
+
 
 if __name__ == "__main__":
     unittest.main()

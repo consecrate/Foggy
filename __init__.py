@@ -1,10 +1,10 @@
-"""Foggy — LeetCode-style coding cards for Anki."""
+"""Foggy — custom study modes for Anki."""
 
 import json
 
 from aqt import gui_hooks, mw
-from aqt.utils import showInfo, qconnect
-from aqt.qt import QAction, QMenu
+from aqt.utils import showInfo, showWarning, qconnect
+from aqt.qt import QAction, QDialog, QFormLayout, QHBoxLayout, QLineEdit, QMenu, QPushButton, QVBoxLayout
 
 CODE_DECK_NAME = "Foggy Code"
 MCQ_DECK_NAME = "Foggy MCQ"
@@ -176,6 +176,85 @@ def _open_import_window() -> None:
     importer.show_import_window()
 
 
+def _enrich_deutsch() -> None:
+    """Enrich pending Foggy Translate notes."""
+    col = mw.col
+    if col is None:
+        showInfo("Please open a profile first.")
+        return
+
+    from . import enricher
+
+    try:
+        enricher.start_enrichment()
+    except Exception as error:
+        showWarning(str(error))
+
+
+TRANSLATE_TEMP_DECK = "Deutsch Temporary"
+TRANSLATE_DECK = "Deutsch"
+DEFAULT_MODEL = "nvidia/nemotron-3-super-120b-a12b:free"
+
+
+def _show_translate_setup() -> None:
+    """Open the Translate Setup dialog."""
+    col = mw.col
+    if col is None:
+        showInfo("Please open a profile first.")
+        return
+
+    config = mw.addonManager.getConfig(__name__) or {}
+
+    dialog = QDialog(mw)
+    dialog.setWindowTitle("Translate Setup")
+    dialog.setMinimumWidth(420)
+
+    layout = QVBoxLayout(dialog)
+    form = QFormLayout()
+
+    key_input = QLineEdit(config.get("openrouter_api_key", ""))
+    key_input.setEchoMode(QLineEdit.EchoMode.Password)
+    key_input.setPlaceholderText("sk-or-...")
+    form.addRow("OpenRouter API Key:", key_input)
+
+    model_input = QLineEdit(config.get("openrouter_model", "") or DEFAULT_MODEL)
+    model_input.setPlaceholderText(DEFAULT_MODEL)
+    form.addRow("Model:", model_input)
+
+    layout.addLayout(form)
+
+    def _save() -> None:
+        config["openrouter_api_key"] = key_input.text().strip()
+        config["openrouter_model"] = model_input.text().strip() or DEFAULT_MODEL
+        mw.addonManager.writeConfig(__name__, config)
+        showInfo("Translate settings saved.")
+
+    def _create_decks() -> None:
+        from . import models
+        models.ensure_note_types()
+        col.decks.id(TRANSLATE_TEMP_DECK)
+        col.decks.id(TRANSLATE_DECK)
+        showInfo(
+            "Decks created!\n\n"
+            f"• {TRANSLATE_TEMP_DECK} — add German sentences here\n"
+            f"• {TRANSLATE_DECK} — enriched cards land here\n\n"
+            "Workflow: add notes to the temporary deck, then use\n"
+            "Foggy → 🇩🇪 Enrich Deutsch to translate them."
+        )
+
+    btn_row = QHBoxLayout()
+    save_btn = QPushButton("Save")
+    save_btn.clicked.connect(_save)
+    btn_row.addWidget(save_btn)
+
+    create_btn = QPushButton("Create Decks")
+    create_btn.clicked.connect(_create_decks)
+    btn_row.addWidget(create_btn)
+
+    layout.addLayout(btn_row)
+    dialog.exec()
+
+
 gui_hooks.profile_did_open.append(_on_profile_loaded)
 
 _foggy_menu = QMenu("Foggy", mw)
@@ -188,6 +267,16 @@ _foggy_menu.addAction(_init_action)
 _import_action = QAction("Import", mw)
 qconnect(_import_action.triggered, _open_import_window)
 _foggy_menu.addAction(_import_action)
+
+_enrich_action = QAction("🇩🇪 Enrich Deutsch", mw)
+qconnect(_enrich_action.triggered, _enrich_deutsch)
+_foggy_menu.addAction(_enrich_action)
+
+_translate_setup_action = QAction("🌐 Translate Setup", mw)
+qconnect(_translate_setup_action.triggered, _show_translate_setup)
+_foggy_menu.addAction(_translate_setup_action)
+
+_foggy_menu.addSeparator()
 
 _reset_action = QAction("🧹 Reset", mw)
 qconnect(_reset_action.triggered, _reset)

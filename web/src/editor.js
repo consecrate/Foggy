@@ -62,11 +62,25 @@ function getBaseExtensions(codeMirror, options) {
 }
 
 function getLanguageExtension(codeMirror, language) {
-  var normalizedLanguage = (language || "python").toLowerCase();
+  var normalizedLanguage = normalizeEditorLanguage(language);
 
   switch (normalizedLanguage) {
+    case "cpp":
+      return codeMirror.cpp();
     case "python":
     default:
       return codeMirror.python();
   }
+}
+
+function normalizeEditorLanguage(language) {
+  var normalizedLanguage = String(language || "python").toLowerCase().trim();
+
+  if (normalizedLanguage === "c++" || normalizedLanguage === "cxx" || normalizedLanguage === "cc") {
+    return "cpp";
+  }
+  if (normalizedLanguage === "py") {
+    return "python";
+  }
+  return normalizedLanguage;
 }

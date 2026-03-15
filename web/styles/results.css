@@ -22,15 +22,15 @@
 }
 
 .foggy-result-header--pass {
-  border-left: 3px solid oklch(0.85 0.15 145);
+  border-left: 3px solid var(--foggy-accent-light);
 }
 
 .foggy-result-header--fail {
-  border-left: 3px solid oklch(0.75 0.16 25);
+  border-left: 3px solid var(--foggy-danger-light);
 }
 
 .foggy-result-header--error {
-  border-left: 3px solid oklch(0.85 0.15 145);
+  border-left: 3px solid var(--foggy-accent-light);
 }
 
 .foggy-result-meta {
